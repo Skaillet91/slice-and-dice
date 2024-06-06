@@ -1,7 +1,20 @@
 <script lang="ts">
+	import getCroppedImg from '$lib/canvasUtils';
+	import Cropper from 'svelte-easy-crop';
+
+	// ToDo: Import from svelte-easy-crop somehow
+	interface CropArea {
+		x: number;
+		y: number;
+		width: number;
+		height: number;
+	}
+
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	const size = 600;
 	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
+	let imageStr: string | null = $state(null);
+	let imageCroppedStr: string | null = $state(null);
 
 	let originalImageWidth = $state(0);
 	let originalImageHeight = $state(0);
@@ -35,8 +48,6 @@
 		const reader = new FileReader();
 
 		reader.onload = (eventOfReader) => {
-			const img = new Image();
-
 			if (!eventOfReader.target?.result) {
 				throw new Error('Expected `eventOfReader.target?.result` to exist at this point.');
 			}
@@ -45,33 +56,76 @@
 				throw new Error('Expected `eventOfReader.target?.result` to be a string, was ArrayBuffer.');
 			}
 
+			const img = new Image();
 			img.src = eventOfReader.target.result;
+			imageStr = eventOfReader.target.result;
 
 			img.onload = () => {
-				console.log('img', img);
+				// if (!canvas) {
+				// 	throw new Error('Expected `canvas` to be initialized at this point.');
+				// }
 
-				if (!canvas) {
-					throw new Error('Expected `canvas` to be initialized at this point.');
-				}
-
-				canvas.width = img.width;
-				canvas.height = img.height;
+				// canvas.width = img.width;
+				// canvas.height = img.height;
 
 				originalImageWidth = img.width;
 				originalImageHeight = img.height;
 
-				const ctx = canvas.getContext('2d');
+				// const ctx = canvas.getContext('2d');
 
-				if (!ctx) {
-					throw new Error('Expected `ctx` to be initialized at this point.');
-				}
+				// if (!ctx) {
+				// 	throw new Error('Expected `ctx` to be initialized at this point.');
+				// }
 
-				ctx.drawImage(img, 0, 0);
+				// ctx.drawImage(img, 0, 0);
 			};
 		};
 
 		reader.readAsDataURL(file);
 	}
+
+	async function cropImage(
+		e: CustomEvent<{
+			percent: CropArea;
+			pixels: CropArea;
+		}>
+	) {
+		if (!imageStr) {
+			throw new Error('Expected imageStr to exist at this point');
+		}
+		imageCroppedStr = await getCroppedImg(imageStr, e.detail.pixels);
+
+		if (!imageCroppedStr) {
+			throw new Error('Expected `imageCroppedStr` to exist at this point.');
+		}
+
+		const img = new Image();
+		img.src = imageCroppedStr;
+
+		img.onload = () => {
+			if (!canvas) {
+				throw new Error('Expected `canvas` to be initialized at this point.');
+			}
+
+			canvas.width = e.detail.pixels.width;
+			canvas.height = e.detail.pixels.height;
+			const ctx = canvas.getContext('2d');
+
+			if (!ctx) {
+				throw new Error('Expected `ctx` to be initialized at this point.');
+			}
+
+			ctx.drawImage(img, 0, 0);
+		};
+	}
+
+	// const ctx = canvas.getContext('2d');
+
+	// if (!ctx) {
+	// 	throw new Error('Expected `ctx` to be initialized at this point.');
+	// }
+
+	// ctx.drawImage(img, 0, 0);
 </script>
 
 <p>
@@ -131,5 +185,16 @@
 	<span>Dice aspect ratio</span>
 	<span>{diceAspectRatio}</span>
 </div>
+
+{#if imageStr}
+	<div style="position: relative; width: 100%; height: 300px;">
+		<Cropper
+			image={imageStr}
+			crop={{ x: 0, y: 0 }}
+			aspect={diceAspectRatio}
+			on:cropcomplete={cropImage}
+		/>
+	</div>
+{/if}
 
 <canvas bind:this={canvas} width={size} height={size} style="width: 500px; height: auto"></canvas>

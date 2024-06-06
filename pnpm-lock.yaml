@@ -50,6 +50,9 @@ importers:
       svelte-check:
         specifier: ^3.6.0
         version: 3.8.0(postcss-load-config@3.1.4(postcss@8.4.38))(postcss@8.4.38)(svelte@5.0.0-next.149)
+      svelte-easy-crop:
+        specifier: ^2.0.3
+        version: 2.0.3(svelte@5.0.0-next.149)
       tslib:
         specifier: ^2.4.1
         version: 2.6.3
@@ -1417,6 +1420,11 @@ packages:
     hasBin: true
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0
+
+  svelte-easy-crop@2.0.3:
+    resolution: {integrity: sha512-hB4CK4JOcnNdXPtaHyI2lFoFYxs2lGrjPvT1/A8Rp5m9aBC2RV0MHCJ0VjNrlSEWjTOEexcBIXCC5RW8QhF4zQ==}
+    peerDependencies:
+      svelte: ^4.0.0
 
   svelte-eslint-parser@0.36.0:
     resolution: {integrity: sha512-/6YmUSr0FAVxW8dXNdIMydBnddPMHzaHirAZ7RrT21XYdgGGZMh0LQG6CZsvAFS4r2Y4ItUuCQc8TQ3urB30mQ==}
@@ -2979,6 +2987,10 @@ snapshots:
       - sass
       - stylus
       - sugarss
+
+  svelte-easy-crop@2.0.3(svelte@5.0.0-next.149):
+    dependencies:
+      svelte: 5.0.0-next.149
 
   svelte-eslint-parser@0.36.0(svelte@5.0.0-next.149):
     dependencies:
