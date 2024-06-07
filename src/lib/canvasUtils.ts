@@ -37,12 +37,6 @@ export default async function getCroppedImg(
   flip = { horizontal: false, vertical: false }
 ): Promise<string | null> {
   const image = await createImage(imageSrc);
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  if (!ctx) {
-    return null;
-  }
 
   const rotRad = getRadianAngle(rotation);
 
@@ -52,10 +46,13 @@ export default async function getCroppedImg(
     image.height,
     rotation
   );
+  
+  const canvas = new OffscreenCanvas(bBoxWidth, bBoxHeight);
+  const ctx = canvas.getContext("2d");
 
-  // set canvas size to match the bounding box
-  canvas.width = bBoxWidth;
-  canvas.height = bBoxHeight;
+  if (!ctx) {
+    throw new Error('Expected `ctx` to be available at this point.')
+  }
 
   // translate canvas context to a central location to allow rotating and flipping around the center
   ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
@@ -86,14 +83,6 @@ export default async function getCroppedImg(
   // return canvas.toDataURL('image/jpeg');
 
   // As a blob
-  return new Promise((resolve/* , reject */) => {
-    canvas.toBlob((file) => {
-      if (!file) {
-        throw new Error('Expected `file` to exist at this point');
-      }
-
-
-      resolve(URL.createObjectURL(file));
-    }, "image/jpeg");
-  });
+  const blob = await canvas.convertToBlob();
+  return URL.createObjectURL(blob);
 }
