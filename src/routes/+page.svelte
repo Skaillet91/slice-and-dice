@@ -1,5 +1,5 @@
 <script lang="ts">
-	import getCroppedImg from '$lib/canvasUtils';
+	import getCroppedImg, { createImage, readFileAsDataUrl } from '$lib/canvasUtils';
 	import Cropper from 'svelte-easy-crop';
 
 	// ToDo: Import from svelte-easy-crop somehow
@@ -13,7 +13,7 @@
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	const size = 600;
 	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
-	let imageStr: string | null = $state(null);
+	let originalImageStr: string | null = $state(null);
 	let imageCroppedStr: string | null = $state(null);
 
 	let originalImageWidth = $state(0);
@@ -35,53 +35,13 @@
 
 	// });
 
-	function imageUploaded(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
+	async function imageUploaded(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
 		console.log(event);
+		originalImageStr = await readFileAsDataUrl(event.currentTarget?.files);
+		const imgElemnt = await createImage(originalImageStr);
 
-		const file = event.currentTarget?.files?.[0];
-
-		if (!file) {
-			console.log('There are no files uploaded, aborting.');
-			return;
-		}
-
-		const reader = new FileReader();
-
-		reader.onload = (eventOfReader) => {
-			if (!eventOfReader.target?.result) {
-				throw new Error('Expected `eventOfReader.target?.result` to exist at this point.');
-			}
-
-			if (eventOfReader.target?.result instanceof ArrayBuffer) {
-				throw new Error('Expected `eventOfReader.target?.result` to be a string, was ArrayBuffer.');
-			}
-
-			const img = new Image();
-			img.src = eventOfReader.target.result;
-			imageStr = eventOfReader.target.result;
-
-			img.onload = () => {
-				// if (!canvas) {
-				// 	throw new Error('Expected `canvas` to be initialized at this point.');
-				// }
-
-				// canvas.width = img.width;
-				// canvas.height = img.height;
-
-				originalImageWidth = img.width;
-				originalImageHeight = img.height;
-
-				// const ctx = canvas.getContext('2d');
-
-				// if (!ctx) {
-				// 	throw new Error('Expected `ctx` to be initialized at this point.');
-				// }
-
-				// ctx.drawImage(img, 0, 0);
-			};
-		};
-
-		reader.readAsDataURL(file);
+		originalImageWidth = imgElemnt.width;
+		originalImageHeight = imgElemnt.height;
 	}
 
 	async function cropImage(
@@ -90,42 +50,32 @@
 			pixels: CropArea;
 		}>
 	) {
-		if (!imageStr) {
+		if (!originalImageStr) {
 			throw new Error('Expected imageStr to exist at this point');
 		}
-		imageCroppedStr = await getCroppedImg(imageStr, e.detail.pixels);
+
+		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels); 
 
 		if (!imageCroppedStr) {
 			throw new Error('Expected `imageCroppedStr` to exist at this point.');
 		}
 
-		const img = new Image();
-		img.src = imageCroppedStr;
+		if (!canvas) {
+			throw new Error('Expected `canvas` to be initialized at this point.');
+		}
 
-		img.onload = () => {
-			if (!canvas) {
-				throw new Error('Expected `canvas` to be initialized at this point.');
-			}
+		canvas.width = originalImageWidth;
+		canvas.height = originalImageHeight;
+		const ctx = canvas.getContext('2d');
 
-			canvas.width = e.detail.pixels.width;
-			canvas.height = e.detail.pixels.height;
-			const ctx = canvas.getContext('2d');
+		if (!ctx) {
+			throw new Error('Expected `ctx` to be initialized at this point.');
+		}
+		
+		const croppedImgElement = await createImage(imageCroppedStr);
 
-			if (!ctx) {
-				throw new Error('Expected `ctx` to be initialized at this point.');
-			}
-
-			ctx.drawImage(img, 0, 0);
-		};
+		ctx.drawImage(croppedImgElement, 0, 0);
 	}
-
-	// const ctx = canvas.getContext('2d');
-
-	// if (!ctx) {
-	// 	throw new Error('Expected `ctx` to be initialized at this point.');
-	// }
-
-	// ctx.drawImage(img, 0, 0);
 </script>
 
 <p>
@@ -186,10 +136,10 @@
 	<span>{diceAspectRatio}</span>
 </div>
 
-{#if imageStr}
+{#if originalImageStr}
 	<div style="position: relative; width: 100%; height: 300px;">
 		<Cropper
-			image={imageStr}
+			image={originalImageStr}
 			crop={{ x: 0, y: 0 }}
 			aspect={diceAspectRatio}
 			on:cropcomplete={cropImage}
