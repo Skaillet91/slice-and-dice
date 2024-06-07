@@ -54,7 +54,7 @@
 			throw new Error('Expected imageStr to exist at this point');
 		}
 
-		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels); 
+		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels, diceCountHorizontal, diceCountVerticalEffective); 
 
 		if (!imageCroppedStr) {
 			throw new Error('Expected `imageCroppedStr` to exist at this point.');
@@ -64,8 +64,6 @@
 			throw new Error('Expected `canvas` to be initialized at this point.');
 		}
 
-		canvas.width = originalImageWidth;
-		canvas.height = originalImageHeight;
 		const ctx = canvas.getContext('2d');
 
 		if (!ctx) {
@@ -74,7 +72,7 @@
 		
 		const croppedImgElement = await createImage(imageCroppedStr);
 
-		ctx.drawImage(croppedImgElement, 0, 0);
+		ctx.drawImage(croppedImgElement, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
 	}
 </script>
 
@@ -147,4 +145,4 @@
 	</div>
 {/if}
 
-<canvas bind:this={canvas} width={size} height={size} style="width: 500px; height: auto"></canvas>
+<canvas bind:this={canvas} width={diceCountHorizontal} height={diceCountVerticalEffective} style="width: 500px; height: auto; image-rendering: pixelated;"></canvas>

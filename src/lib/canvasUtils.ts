@@ -39,53 +39,24 @@ export function readFileAsDataUrl(files: FileList | null): Promise<string> {
   });
 }
 
-export function getRadianAngle(degreeValue: number) {
-	return (degreeValue * Math.PI) / 180;
-}
-
-/**
- * Returns the new bounding area of a rotated rectangle.
- */
-export function rotateSize(width: number, height: number, rotation: number) {
-	const rotRad = getRadianAngle(rotation);
-
-	return {
-		width: Math.abs(Math.cos(rotRad) * width) + Math.abs(Math.sin(rotRad) * height),
-		height: Math.abs(Math.sin(rotRad) * width) + Math.abs(Math.cos(rotRad) * height)
-	};
-}
-
 /**
  * This function was adapted from the one in the ReadMe of https://github.com/DominicTobias/react-image-crop
  */
 export default async function getCroppedImg(
 	imageSrc: string,
-	pixelCrop: { x: number; y: number; width: number; height: number },
-	rotation = 0,
-	flip = { horizontal: false, vertical: false }
+	pixelCrop: { x: number; y: number; width: number; height: number }
 ): Promise<string | null> {
 	const image = await createImage(imageSrc);
 
-	const rotRad = getRadianAngle(rotation);
-
-	// calculate bounding box of the rotated image
-	const { width: bBoxWidth, height: bBoxHeight } = rotateSize(image.width, image.height, rotation);
-
-	const canvas = new OffscreenCanvas(bBoxWidth, bBoxHeight);
+	const canvas = new OffscreenCanvas(image.width, image.height);
 	const ctx = canvas.getContext('2d');
 
 	if (!ctx) {
 		throw new Error('Expected `ctx` to be available at this point.');
 	}
 
-	// translate canvas context to a central location to allow rotating and flipping around the center
-	ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
-	ctx.rotate(rotRad);
-	ctx.scale(flip.horizontal ? -1 : 1, flip.vertical ? -1 : 1);
-	ctx.translate(-image.width / 2, -image.height / 2);
-
 	// draw rotated image
-	ctx.drawImage(image, 0, 0);
+	ctx.drawImage(image, 0, 0, image.width, image.height);
 
 	// croppedAreaPixels values are bounding box relative
 	// extract the cropped image using these values
