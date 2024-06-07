@@ -29,6 +29,7 @@
 			: diceCountVertical
 	);
 	let diceAspectRatio = $derived(diceCountHorizontal / diceCountVerticalEffective);
+	let diceCountTotal = $derived(diceCountHorizontal * diceCountVerticalEffective);
 
 	// $effect(() => {
 	//   const ctx = canvas.getContext('2d');
@@ -93,7 +94,7 @@
 
 <div>
 	<span>Original image aspect ratio:</span>
-	<span>{originalImageAspectRatio}</span>
+	<span>{Math.round(originalImageAspectRatio * 100)/100}</span>
 	<label>
 		<input type="checkbox" bind:checked={lockOriginalImageAspectRatio} />
 		Lock
@@ -130,8 +131,13 @@
 </div>
 
 <div>
-	<span>Dice aspect ratio</span>
-	<span>{diceAspectRatio}</span>
+	<span>Dice count total:</span>
+	<span>{diceCountTotal}</span>
+</div>
+
+<div>
+	<span>Dice aspect ratio:</span>
+	<span>{Math.round(diceAspectRatio * 100)/100}</span>
 </div>
 
 {#if originalImageStr}
