@@ -1,5 +1,5 @@
 <script lang="ts">
-	import getCroppedImg, { createImage, readFileAsDataUrl } from '$lib/canvasUtils';
+	import getCroppedImg, { adjustGamma, createImage, readFileAsDataUrl } from '$lib/canvasUtils';
 	import Cropper from 'svelte-easy-crop';
 
 	// ToDo: Import from svelte-easy-crop somehow
@@ -33,7 +33,7 @@
 
 	let brightness = $state(100);
 	let contrast = $state(100);
-	// let gamma = $state(100);
+	let gamma = $state(100);
 
 	$effect(() => {
 		if (!imageCroppedStr || !canvas) {
@@ -46,11 +46,17 @@
 			throw new Error('Expected `ctx` to be initialized at this point.');
 		}
 
-		const sync = { brightness, contrast };
+		const sync = { brightness, contrast, gamma };
 
 		createImage(imageCroppedStr).then((croppedImgElement) => {
 			ctx.filter = `brightness(${sync.brightness}%) contrast(${sync.contrast}%) grayscale(100%)`;
 			ctx.drawImage(croppedImgElement, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
+
+			if (!canvas) {
+				throw new Error('Expected `canvas` to exist at this point');
+			}
+
+			adjustGamma(canvas, sync.gamma / 100);
 		});
 	});
 
@@ -153,6 +159,14 @@
 		<span>Contrast</span>
 		<input type="number" min="0" bind:value={contrast} />
 		<input type="range" min="0" max="200" bind:value={contrast} />
+	</label>
+</div>
+
+<div>
+	<label>
+		<span>Gamma</span>
+		<input type="number" min="0" bind:value={gamma} />
+		<input type="range" min="0" max="200" bind:value={gamma} />
 	</label>
 </div>
 

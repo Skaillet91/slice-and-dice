@@ -11,8 +11,6 @@ export const createImage = (url: string): Promise<HTMLImageElement> => {
 }
 
 export function readFileAsDataUrl(files: FileList | null): Promise<string> {
-
-
   return new Promise((resolve, reject) => {
     const file = files?.[0];
 
@@ -37,6 +35,25 @@ export function readFileAsDataUrl(files: FileList | null): Promise<string> {
   
     reader.readAsDataURL(file);
   });
+}
+
+// https://stackoverflow.com/a/54029690/901944
+export function adjustGamma(canvas: HTMLCanvasElement, gamma: number) {
+	const gammaCorrection = 1 / gamma;
+	const ctx = canvas.getContext('2d');
+
+	if (!ctx) {
+		throw new Error('Expected `ctx` to exist at this point');
+	}
+
+	const imageData = ctx.getImageData(0.0, 0.0, canvas.width, canvas.height);
+	const data = imageData.data;
+	for (let i = 0; i < data.length; i += 4) {
+			data[i] = 255 * Math.pow((data[i] / 255), gammaCorrection);
+			data[i+1] = 255 * Math.pow((data[i+1] / 255), gammaCorrection);
+			data[i+2] = 255 * Math.pow((data[i+2] / 255), gammaCorrection);
+	}
+	ctx.putImageData(imageData, 0, 0);
 }
 
 /**
