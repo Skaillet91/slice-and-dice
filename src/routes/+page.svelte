@@ -1,5 +1,10 @@
 <script lang="ts">
-	import getCroppedImg, { adjustGamma, createImage, readFileAsDataUrl } from '$lib/canvasUtils';
+	import getCroppedImg, {
+		adjustGamma,
+		createImage,
+		readFileAsDataUrl,
+		reduceColorPalette
+	} from '$lib/canvasUtils';
 	import Cropper from 'svelte-easy-crop';
 
 	// ToDo: Import from svelte-easy-crop somehow
@@ -8,6 +13,12 @@
 		y: number;
 		width: number;
 		height: number;
+	}
+
+	enum DiceColor {
+		White,
+		Black,
+		Both
 	}
 
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -31,6 +42,9 @@
 	let diceAspectRatio = $derived(diceCountHorizontal / diceCountVerticalEffective);
 	let diceCountTotal = $derived(diceCountHorizontal * diceCountVerticalEffective);
 
+	let diceColor = $state(DiceColor.Both);
+	let diceSidesCount = $derived(diceColor === DiceColor.Both ? 12 : 6);
+
 	let brightness = $state(100);
 	let contrast = $state(100);
 	let gamma = $state(100);
@@ -46,7 +60,7 @@
 			throw new Error('Expected `ctx` to be initialized at this point.');
 		}
 
-		const sync = { brightness, contrast, gamma };
+		const sync = { brightness, contrast, gamma, diceSidesCount };
 
 		createImage(imageCroppedStr).then((croppedImgElement) => {
 			ctx.filter = `brightness(${sync.brightness}%) contrast(${sync.contrast}%) grayscale(100%)`;
@@ -57,6 +71,7 @@
 			}
 
 			adjustGamma(canvas, sync.gamma / 100);
+			reduceColorPalette(canvas, sync.diceSidesCount);
 		});
 	});
 
@@ -133,6 +148,22 @@
 			disabled={lockOriginalImageAspectRatio}
 			oninput={(e) => diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
 		/>
+	</label>
+</div>
+
+<div>
+	<label>
+		<span>Dice color</span>
+		<input type="radio" name="dice color" value={DiceColor.White} bind:group={diceColor} />
+		White
+	</label>
+	<label>
+		<input type="radio" name="dice color" value={DiceColor.Black} bind:group={diceColor} />
+		Black
+	</label>
+	<label>
+		<input type="radio" name="dice color" value={DiceColor.Both} bind:group={diceColor} />
+		Both
 	</label>
 </div>
 

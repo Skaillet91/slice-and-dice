@@ -8,37 +8,37 @@ export const createImage = (url: string): Promise<HTMLImageElement> => {
 		image.setAttribute('crossOrigin', 'anonymous'); // needed to avoid cross-origin issues on CodeSandbox
 		image.src = url;
 	});
-}
+};
 
 export function readFileAsDataUrl(files: FileList | null): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const file = files?.[0];
+	return new Promise((resolve, reject) => {
+		const file = files?.[0];
 
-    if (!file) {
-      reject(new Error('Expected a file'));
-      return;
-    }
+		if (!file) {
+			reject(new Error('Expected a file'));
+			return;
+		}
 
-    const reader = new FileReader();
-  
-    reader.onload = (eventOfReader) => {
-      if (!eventOfReader.target?.result) {
-        throw new Error('Expected `eventOfReader.target?.result` to exist at this point.');
-      }
-  
-      if (eventOfReader.target?.result instanceof ArrayBuffer) {
-        throw new Error('Expected `eventOfReader.target?.result` to be a string, was ArrayBuffer.');
-      }
-  
-      resolve(eventOfReader.target?.result);
-    };
-  
-    reader.readAsDataURL(file);
-  });
+		const reader = new FileReader();
+
+		reader.onload = (eventOfReader) => {
+			if (!eventOfReader.target?.result) {
+				throw new Error('Expected `eventOfReader.target?.result` to exist at this point.');
+			}
+
+			if (eventOfReader.target?.result instanceof ArrayBuffer) {
+				throw new Error('Expected `eventOfReader.target?.result` to be a string, was ArrayBuffer.');
+			}
+
+			resolve(eventOfReader.target?.result);
+		};
+
+		reader.readAsDataURL(file);
+	});
 }
 
 // https://stackoverflow.com/a/54029690/901944
-export function adjustGamma(canvas: HTMLCanvasElement, gamma: number) {
+export function adjustGamma(canvas: HTMLCanvasElement, gamma: number): void {
 	const gammaCorrection = 1 / gamma;
 	const ctx = canvas.getContext('2d');
 
@@ -49,11 +49,33 @@ export function adjustGamma(canvas: HTMLCanvasElement, gamma: number) {
 	const imageData = ctx.getImageData(0.0, 0.0, canvas.width, canvas.height);
 	const data = imageData.data;
 	for (let i = 0; i < data.length; i += 4) {
-			data[i] = 255 * Math.pow((data[i] / 255), gammaCorrection);
-			data[i+1] = 255 * Math.pow((data[i+1] / 255), gammaCorrection);
-			data[i+2] = 255 * Math.pow((data[i+2] / 255), gammaCorrection);
+		data[i] = 255 * Math.pow(data[i] / 255, gammaCorrection);
+		data[i + 1] = 255 * Math.pow(data[i + 1] / 255, gammaCorrection);
+		data[i + 2] = 255 * Math.pow(data[i + 2] / 255, gammaCorrection);
 	}
 	ctx.putImageData(imageData, 0, 0);
+}
+
+// https://stackoverflow.com/a/17717174/901944
+export function reduceColorPalette(canvas: HTMLCanvasElement, numberOfColors: number): void {
+	const ctx = canvas.getContext('2d');
+
+	if (!ctx) {
+		throw new Error('Expected `ctx` to exist at this point');
+	}
+
+	const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+	for (let i = 0; i < data.length; i += 4) {
+		const originalGrey = data[i];
+		const newGrey = Math.round(
+			(Math.round((originalGrey / 255) * numberOfColors) * 255) / numberOfColors
+		);
+
+		data[i] = data[i + 1] = data[i + 2] = newGrey;
+	}
+
+	ctx.putImageData(new ImageData(data, canvas.width, canvas.height), 0, 0);
 }
 
 /**
