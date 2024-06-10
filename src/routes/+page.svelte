@@ -31,10 +31,28 @@
 	let diceAspectRatio = $derived(diceCountHorizontal / diceCountVerticalEffective);
 	let diceCountTotal = $derived(diceCountHorizontal * diceCountVerticalEffective);
 
-	// $effect(() => {
-	//   const ctx = canvas.getContext('2d');
+	let brightness = $state(100);
+	let contrast = $state(100);
+	// let gamma = $state(100);
 
-	// });
+	$effect(() => {
+		if (!imageCroppedStr || !canvas) {
+			return;
+		}
+
+		const ctx = canvas.getContext('2d');
+
+		if (!ctx) {
+			throw new Error('Expected `ctx` to be initialized at this point.');
+		}
+
+		const sync = { brightness, contrast };
+
+		createImage(imageCroppedStr).then((croppedImgElement) => {
+			ctx.filter = `brightness(${sync.brightness}%) contrast(${sync.contrast}%) grayscale(100%)`;
+			ctx.drawImage(croppedImgElement, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
+		});
+	});
 
 	async function imageUploaded(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
 		console.log(event);
@@ -55,25 +73,7 @@
 			throw new Error('Expected imageStr to exist at this point');
 		}
 
-		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels, diceCountHorizontal, diceCountVerticalEffective); 
-
-		if (!imageCroppedStr) {
-			throw new Error('Expected `imageCroppedStr` to exist at this point.');
-		}
-
-		if (!canvas) {
-			throw new Error('Expected `canvas` to be initialized at this point.');
-		}
-
-		const ctx = canvas.getContext('2d');
-
-		if (!ctx) {
-			throw new Error('Expected `ctx` to be initialized at this point.');
-		}
-		
-		const croppedImgElement = await createImage(imageCroppedStr);
-
-		ctx.drawImage(croppedImgElement, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
+		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels);
 	}
 </script>
 
@@ -94,7 +94,7 @@
 
 <div>
 	<span>Original image aspect ratio:</span>
-	<span>{Math.round(originalImageAspectRatio * 100)/100}</span>
+	<span>{Math.round(originalImageAspectRatio * 100) / 100}</span>
 	<label>
 		<input type="checkbox" bind:checked={lockOriginalImageAspectRatio} />
 		Lock
@@ -137,7 +137,23 @@
 
 <div>
 	<span>Dice aspect ratio:</span>
-	<span>{Math.round(diceAspectRatio * 100)/100}</span>
+	<span>{Math.round(diceAspectRatio * 100) / 100}</span>
+</div>
+
+<div>
+	<label>
+		<span>Brightness</span>
+		<input type="number" min="0" bind:value={brightness} />
+		<input type="range" min="0" max="200" bind:value={brightness} />
+	</label>
+</div>
+
+<div>
+	<label>
+		<span>Contrast</span>
+		<input type="number" min="0" bind:value={contrast} />
+		<input type="range" min="0" max="200" bind:value={contrast} />
+	</label>
 </div>
 
 {#if originalImageStr}
@@ -151,4 +167,9 @@
 	</div>
 {/if}
 
-<canvas bind:this={canvas} width={diceCountHorizontal} height={diceCountVerticalEffective} style="width: 500px; height: auto; image-rendering: pixelated;"></canvas>
+<canvas
+	bind:this={canvas}
+	width={diceCountHorizontal}
+	height={diceCountVerticalEffective}
+	style="width: 500px; height: auto; image-rendering: pixelated;"
+></canvas>
