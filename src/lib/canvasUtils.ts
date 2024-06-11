@@ -1,5 +1,10 @@
 // https://codesandbox.io/p/sandbox/svelte-easy-crop-with-file-upload-and-live-preview-36xsr?file=%2FcanvasUtils.js
 
+export enum DiceSidesCount {
+	Six = 6,
+	Twelve = 12
+}
+
 export const createImage = (url: string): Promise<HTMLImageElement> => {
 	return new Promise((resolve, reject) => {
 		const image = new Image();
@@ -37,78 +42,96 @@ export function readFileAsDataUrl(files: FileList | null): Promise<string> {
 	});
 }
 
-// https://stackoverflow.com/a/54029690/901944
-export function adjustGamma(canvas: HTMLCanvasElement, gamma: number): void {
-	const gammaCorrection = 1 / gamma;
-	const ctx = canvas.getContext('2d');
+export function withOffscreenCanvas<T>(
+	data: HTMLImageElement | ImageData | { width: number; height: number },
+	callback: (ctx: OffscreenCanvasRenderingContext2D, canvas: OffscreenCanvas) => T
+): T {
+	const canvas = new OffscreenCanvas(data.width, data.height);
 
-	if (!ctx) {
-		throw new Error('Expected `ctx` to exist at this point');
-	}
-
-	const imageData = ctx.getImageData(0.0, 0.0, canvas.width, canvas.height);
-	const data = imageData.data;
-	for (let i = 0; i < data.length; i += 4) {
-		data[i] = 255 * Math.pow(data[i] / 255, gammaCorrection);
-		data[i + 1] = 255 * Math.pow(data[i + 1] / 255, gammaCorrection);
-		data[i + 2] = 255 * Math.pow(data[i + 2] / 255, gammaCorrection);
-	}
-	ctx.putImageData(imageData, 0, 0);
-}
-
-// https://stackoverflow.com/a/17717174/901944
-export function reduceColorPalette(canvas: HTMLCanvasElement, numberOfColors: number): void {
-	const ctx = canvas.getContext('2d');
-
-	if (!ctx) {
-		throw new Error('Expected `ctx` to exist at this point');
-	}
-
-	const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-	for (let i = 0; i < data.length; i += 4) {
-		const originalGrey = data[i];
-		const newGrey = Math.round(
-			(Math.round((originalGrey / 255) * numberOfColors) * 255) / numberOfColors
-		);
-
-		data[i] = data[i + 1] = data[i + 2] = newGrey;
-	}
-
-	ctx.putImageData(new ImageData(data, canvas.width, canvas.height), 0, 0);
-}
-
-/**
- * This function was adapted from the one in the ReadMe of https://github.com/DominicTobias/react-image-crop
- */
-export default async function getCroppedImg(
-	imageSrc: string,
-	pixelCrop: { x: number; y: number; width: number; height: number }
-): Promise<string | null> {
-	const image = await createImage(imageSrc);
-
-	const canvas = new OffscreenCanvas(image.width, image.height);
 	const ctx = canvas.getContext('2d');
 
 	if (!ctx) {
 		throw new Error('Expected `ctx` to be available at this point.');
 	}
 
-	// draw rotated image
-	ctx.drawImage(image, 0, 0, image.width, image.height);
+	if (data instanceof ImageData) {
+		ctx.putImageData(data, 0, 0);
+	} else if (data instanceof HTMLImageElement) {
+		ctx.drawImage(data, 0, 0, data.width, data.height);
+	}
 
-	// croppedAreaPixels values are bounding box relative
-	// extract the cropped image using these values
-	const data = ctx.getImageData(pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height);
+	return callback(ctx, canvas);
+}
 
-	// set canvas width to final desired crop size - this will clear existing context
-	canvas.width = pixelCrop.width;
-	canvas.height = pixelCrop.height;
+export function cloneImageData(imgData: ImageData): ImageData {
+	const newImgDataData = new Uint8ClampedArray(imgData.data);
+	return new ImageData(newImgDataData, imgData.width, imgData.height, {
+		colorSpace: imgData.colorSpace
+	});
+}
 
-	// paste generated rotate image at the top left corner
-	ctx.putImageData(data, 0, 0);
+export function applyFilters(
+	imgData: ImageData,
+	{
+		brightness,
+		contrast,
+		gamma,
+		diceSidesCount
+	}: { brightness: number; contrast: number; gamma: number; diceSidesCount: DiceSidesCount }
+): ImageData {
+	const newImgData = cloneImageData(imgData);
+	const { data } = newImgData;
 
-	const blob = await canvas.convertToBlob();
+	console.log('contrast', contrast);
 
-	return URL.createObjectURL(blob);
+	const contrastFactor = (259 * (contrast - 100 + 255)) / (255 * (259 - (contrast - 100)));
+	const brightnessFactor = brightness / 100;
+	const gammaCorrection = 1 / (gamma / 100);
+
+	for (let i = 0; i < data.length; i += 4) {
+		// Apply contrast
+		data[i] = contrastFactor * (data[i] - 128) + 128;
+		data[i + 1] = contrastFactor * (data[i + 1] - 128) + 128;
+		data[i + 2] = contrastFactor * (data[i + 2] - 128) + 128;
+
+		// Apply brightness
+		data[i] *= brightnessFactor;
+		data[i + 1] *= brightnessFactor;
+		data[i + 2] *= brightnessFactor;
+
+		// Apply gamma correction
+		data[i] = 255 * Math.pow(data[i] / 255, gammaCorrection);
+		data[i + 1] = 255 * Math.pow(data[i + 1] / 255, gammaCorrection);
+		data[i + 2] = 255 * Math.pow(data[i + 2] / 255, gammaCorrection);
+
+		// Convert to grayscale
+		data[i] =
+			data[i + 1] =
+			data[i + 2] =
+				0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+
+		// Reduce color palette
+		data[i] =
+			data[i + 1] =
+			data[i + 2] =
+				// https://stackoverflow.com/a/17717174/901944
+				Math.round((Math.round((data[i] / 255) * diceSidesCount) * 255) / diceSidesCount);
+	}
+
+	return newImgData;
+}
+
+export default function getCroppedImg(
+	image: HTMLImageElement,
+	pixelCrop: { x: number; y: number; width: number; height: number }
+): ImageData /* Promise<string | null> */ {
+	if (!image.complete) {
+		throw new Error('This is a sync function. It expects the image to be fully loaded.');
+	}
+
+	return withOffscreenCanvas(image, (ctx) => {
+		// croppedAreaPixels values are bounding box relative
+		// extract the cropped image using these values
+		return ctx.getImageData(pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height);
+	});
 }

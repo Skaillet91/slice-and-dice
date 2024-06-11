@@ -1,9 +1,11 @@
 <script lang="ts">
 	import getCroppedImg, {
-		adjustGamma,
+		DiceSidesCount,
+		applyFilters,
+		cloneImageData,
 		createImage,
 		readFileAsDataUrl,
-		reduceColorPalette
+		withOffscreenCanvas
 	} from '$lib/canvasUtils';
 	import Cropper from 'svelte-easy-crop';
 
@@ -22,79 +24,113 @@
 	}
 
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-	const size = 600;
 	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
-	let originalImageStr: string | null = $state(null);
-	let imageCroppedStr: string | null = $state(null);
+	let imgString_original: string | null = $state(null);
+	let imgElement_original: HTMLImageElement | null = $state(null);
+	let cropArea: CropArea | null = $state(null);
 
-	let originalImageWidth = $state(0);
-	let originalImageHeight = $state(0);
-	let lockOriginalImageAspectRatio = $state(true);
-	let originalImageAspectRatio = $derived(originalImageWidth / originalImageHeight);
-
-	let diceCountHorizontal = $state(100);
-	let diceCountVertical = $state(60);
-	let diceCountVerticalEffective = $derived(
-		lockOriginalImageAspectRatio
-			? Math.round(diceCountHorizontal / originalImageAspectRatio)
-			: diceCountVertical
+	let imgData_cropped: ImageData | null = $derived(
+		imgElement_original && cropArea ? getCroppedImg(imgElement_original, cropArea) : null
 	);
-	let diceAspectRatio = $derived(diceCountHorizontal / diceCountVerticalEffective);
-	let diceCountTotal = $derived(diceCountHorizontal * diceCountVerticalEffective);
 
-	let diceColor = $state(DiceColor.Both);
-	let diceSidesCount = $derived(diceColor === DiceColor.Both ? 12 : 6);
+	let lockOriginalImageAspectRatio: boolean = $state(true);
+
+	let originalImageAspectRatio: number | null = $derived.by(() => {
+		return imgElement_original ? imgElement_original.width / imgElement_original.height : null;
+	});
+
+	let diceCountHorizontal: number = $state(100);
+	let diceCountVertical: number = $state(60);
+
+	let diceCountVerticalEffective: number | null = $derived.by(() => {
+		if (!lockOriginalImageAspectRatio) {
+			return diceCountVertical;
+		}
+
+		if (originalImageAspectRatio === null) {
+			return null;
+		}
+
+		return Math.round(diceCountHorizontal / originalImageAspectRatio);
+	});
+
+	let diceAspectRatio: number | undefined = $derived(
+		diceCountVerticalEffective === null
+			? undefined
+			: diceCountHorizontal / diceCountVerticalEffective
+	);
+	let diceCountTotal: number | null = $derived(
+		diceCountVerticalEffective === null ? null : diceCountHorizontal * diceCountVerticalEffective
+	);
+
+	let diceColor: DiceColor = $state(DiceColor.Both);
+
+	let diceSidesCount: DiceSidesCount = $derived(
+		diceColor === DiceColor.Both ? DiceSidesCount.Twelve : DiceSidesCount.Six
+	);
 
 	let brightness = $state(100);
 	let contrast = $state(100);
 	let gamma = $state(100);
 
-	$effect(() => {
-		if (!imageCroppedStr || !canvas) {
-			return;
+	let imgData_cropped_resized: ImageData | null = $derived.by(() => {
+		if (!imgData_cropped || !diceCountVerticalEffective) {
+			return null;
 		}
 
-		const ctx = canvas.getContext('2d');
+		const canvas = withOffscreenCanvas(imgData_cropped, (_ctx, canvas) => canvas);
 
-		if (!ctx) {
-			throw new Error('Expected `ctx` to be initialized at this point.');
-		}
-
-		const sync = { brightness, contrast, gamma, diceSidesCount };
-
-		createImage(imageCroppedStr).then((croppedImgElement) => {
-			ctx.filter = `brightness(${sync.brightness}%) contrast(${sync.contrast}%) grayscale(100%)`;
-			ctx.drawImage(croppedImgElement, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
-
-			if (!canvas) {
-				throw new Error('Expected `canvas` to exist at this point');
+		return withOffscreenCanvas(
+			{ width: diceCountHorizontal, height: diceCountVerticalEffective },
+			(ctx) => {
+				ctx.drawImage(canvas, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
+				return ctx.getImageData(0, 0, diceCountHorizontal, diceCountVerticalEffective);
 			}
-
-			adjustGamma(canvas, sync.gamma / 100);
-			reduceColorPalette(canvas, sync.diceSidesCount);
-		});
+		);
 	});
 
-	async function imageUploaded(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		console.log(event);
-		originalImageStr = await readFileAsDataUrl(event.currentTarget?.files);
-		const imgElemnt = await createImage(originalImageStr);
+	let imgData_cropped_resized_filtered: ImageData | null = $derived.by(() => {
+		if (!imgData_cropped_resized) {
+			return null;
+		}
 
-		originalImageWidth = imgElemnt.width;
-		originalImageHeight = imgElemnt.height;
+		return applyFilters(imgData_cropped_resized, { brightness, contrast, gamma, diceSidesCount });
+	});
+
+	$effect(() => {
+		const imgData = imgData_cropped_resized_filtered;
+
+		if (canvas && imgData) {
+			canvas.width = imgData.width;
+			canvas.height = imgData.height;
+
+			const ctx = canvas.getContext('2d');
+
+			if (!ctx) {
+				throw new Error('Expected `ctx` to exist at this point.');
+			}
+
+			ctx.putImageData(imgData, 0, 0);
+		}
+	});
+
+
+	async function persistUploadedImage(
+		event: Event & { currentTarget: EventTarget & HTMLInputElement }
+	) {
+		const imgString = await readFileAsDataUrl(event.currentTarget?.files);
+		imgElement_original = await createImage(imgString);
+		cropArea = { x: 0, y: 0, width: imgElement_original.width, height: imgElement_original.height };
+		imgString_original = imgString; // should populate after image is loaded inside `createImage`, in order to avoid a race condition
 	}
 
-	async function cropImage(
+	function persistCropArea(
 		e: CustomEvent<{
-			percent: CropArea;
+			/* percent: CropArea; */
 			pixels: CropArea;
 		}>
 	) {
-		if (!originalImageStr) {
-			throw new Error('Expected imageStr to exist at this point');
-		}
-
-		imageCroppedStr = await getCroppedImg(originalImageStr, e.detail.pixels);
+		cropArea = e.detail.pixels;
 	}
 </script>
 
@@ -106,7 +142,7 @@
 			name="fileToUpload"
 			accept={authorizedExtensions.join(',')}
 			required
-			onchange={imageUploaded}
+			onchange={persistUploadedImage}
 		/>
 
 		<span>Upload your file</span>
@@ -115,7 +151,7 @@
 
 <div>
 	<span>Original image aspect ratio:</span>
-	<span>{Math.round(originalImageAspectRatio * 100) / 100}</span>
+	<span>{originalImageAspectRatio ? Math.round(originalImageAspectRatio * 100) / 100 : null}</span>
 	<label>
 		<input type="checkbox" bind:checked={lockOriginalImageAspectRatio} />
 		Lock
@@ -174,14 +210,14 @@
 
 <div>
 	<span>Dice aspect ratio:</span>
-	<span>{Math.round(diceAspectRatio * 100) / 100}</span>
+	<span>{diceAspectRatio === undefined ? null : Math.round(diceAspectRatio * 100) / 100}</span>
 </div>
 
 <div>
 	<label>
 		<span>Brightness</span>
 		<input type="number" min="0" bind:value={brightness} />
-		<input type="range" min="0" max="200" bind:value={brightness} />
+		<input type="range" min="0" max="400" bind:value={brightness} />
 	</label>
 </div>
 
@@ -189,7 +225,7 @@
 	<label>
 		<span>Contrast</span>
 		<input type="number" min="0" bind:value={contrast} />
-		<input type="range" min="0" max="200" bind:value={contrast} />
+		<input type="range" min="0" max="400" bind:value={contrast} />
 	</label>
 </div>
 
@@ -197,17 +233,17 @@
 	<label>
 		<span>Gamma</span>
 		<input type="number" min="0" bind:value={gamma} />
-		<input type="range" min="0" max="200" bind:value={gamma} />
+		<input type="range" min="0" max="400" bind:value={gamma} />
 	</label>
 </div>
 
-{#if originalImageStr}
+{#if imgString_original}
 	<div style="position: relative; width: 100%; height: 300px;">
 		<Cropper
-			image={originalImageStr}
+			image={imgString_original}
 			crop={{ x: 0, y: 0 }}
 			aspect={diceAspectRatio}
-			on:cropcomplete={cropImage}
+			on:cropcomplete={persistCropArea}
 		/>
 	</div>
 {/if}
