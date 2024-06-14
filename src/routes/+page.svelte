@@ -217,7 +217,7 @@
 	<label>
 		<span>Brightness</span>
 		<input type="number" min="0" bind:value={brightness} />
-		<input type="range" min="0" max="400" bind:value={brightness} />
+		<input type="range" min="0" max="200" bind:value={brightness} />
 	</label>
 </div>
 
@@ -225,7 +225,7 @@
 	<label>
 		<span>Contrast</span>
 		<input type="number" min="0" bind:value={contrast} />
-		<input type="range" min="0" max="400" bind:value={contrast} />
+		<input type="range" min="0" max="200" bind:value={contrast} />
 	</label>
 </div>
 
@@ -233,7 +233,7 @@
 	<label>
 		<span>Gamma</span>
 		<input type="number" min="0" bind:value={gamma} />
-		<input type="range" min="0" max="400" bind:value={gamma} />
+		<input type="range" min="0" max="200" bind:value={gamma} />
 	</label>
 </div>
 

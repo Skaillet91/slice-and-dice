@@ -87,22 +87,23 @@ export function applyFilters(
 	const contrastFactor = (259 * (contrast - 100 + 255)) / (255 * (259 - (contrast - 100)));
 	const brightnessFactor = brightness / 100;
 	const gammaCorrection = 1 / (gamma / 100);
+	const normalize = (value: number) => Math.max(0, Math.min(255, value));
 
 	for (let i = 0; i < data.length; i += 4) {
 		// Apply contrast
-		data[i] = contrastFactor * (data[i] - 128) + 128;
-		data[i + 1] = contrastFactor * (data[i + 1] - 128) + 128;
-		data[i + 2] = contrastFactor * (data[i + 2] - 128) + 128;
+		data[i] = normalize(contrastFactor * (data[i] - 128) + 128);
+		data[i + 1] = normalize(contrastFactor * (data[i + 1] - 128) + 128);
+		data[i + 2] = normalize(contrastFactor * (data[i + 2] - 128) + 128);
 
 		// Apply brightness
-		data[i] *= brightnessFactor;
-		data[i + 1] *= brightnessFactor;
-		data[i + 2] *= brightnessFactor;
+		data[i] = normalize(data[i] * brightnessFactor);
+		data[i + 1] = normalize(data[i + 1] * brightnessFactor);
+		data[i + 2] = normalize(data[i + 2] * brightnessFactor);
 
 		// Apply gamma correction
-		data[i] = 255 * Math.pow(data[i] / 255, gammaCorrection);
-		data[i + 1] = 255 * Math.pow(data[i + 1] / 255, gammaCorrection);
-		data[i + 2] = 255 * Math.pow(data[i + 2] / 255, gammaCorrection);
+		data[i] = normalize(255 * Math.pow(data[i] / 255, gammaCorrection));
+		data[i + 1] = normalize(255 * Math.pow(data[i + 1] / 255, gammaCorrection));
+		data[i + 2] = normalize(255 * Math.pow(data[i + 2] / 255, gammaCorrection));
 
 		// Convert to grayscale
 		data[i] =
@@ -114,8 +115,10 @@ export function applyFilters(
 		data[i] =
 			data[i + 1] =
 			data[i + 2] =
-				// https://stackoverflow.com/a/17717174/901944
-				Math.round((Math.round((data[i] / 255) * diceSidesCount) * 255) / diceSidesCount);
+				normalize(
+					// https://stackoverflow.com/a/17717174/901944
+					Math.round((Math.round((data[i] / 255) * diceSidesCount) * 255) / diceSidesCount)
+				);
 	}
 
 	return newImgData;
