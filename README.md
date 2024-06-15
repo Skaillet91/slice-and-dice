@@ -23,11 +23,11 @@ This project uses `mise` to pin Node version in the `.mise.toml` file and `corep
 1. Install `mise` CLI: https://mise.jdx.dev/getting-started.html
 2. In the `slice-and-dice` project directory, run the following:
 
-    ```sh
-    mise install
-    corepack install
-    corepack enable
-    ```
+   ```sh
+   mise install
+   corepack install
+   corepack enable
+   ```
 
 ### Generic instructions
 

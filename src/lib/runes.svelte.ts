@@ -82,6 +82,6 @@ export const useLocalStorageRune = <StoredJson extends Json>(
 		set value(newValue: StoredJson) {
 			_value = newValue;
 			save();
-		}
+		},
 	};
 };

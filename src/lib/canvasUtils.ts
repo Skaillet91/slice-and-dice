@@ -2,7 +2,7 @@
 
 export enum DiceSidesCount {
 	Six = 6,
-	Twelve = 12
+	Twelve = 12,
 }
 
 export const createImage = (url: string): Promise<HTMLImageElement> => {
@@ -66,7 +66,7 @@ export function withOffscreenCanvas<T>(
 export function cloneImageData(imgData: ImageData): ImageData {
 	const newImgDataData = new Uint8ClampedArray(imgData.data);
 	return new ImageData(newImgDataData, imgData.width, imgData.height, {
-		colorSpace: imgData.colorSpace
+		colorSpace: imgData.colorSpace,
 	});
 }
 
@@ -76,7 +76,7 @@ export function applyFilters(
 		brightness,
 		contrast,
 		gamma,
-		diceSidesCount
+		diceSidesCount,
 	}: { brightness: number; contrast: number; gamma: number; diceSidesCount: DiceSidesCount }
 ): ImageData {
 	const newImgData = cloneImageData(imgData);
@@ -106,10 +106,7 @@ export function applyFilters(
 		data[i + 2] = normalize(255 * Math.pow(data[i + 2] / 255, gammaCorrection));
 
 		// Convert to grayscale
-		data[i] =
-			data[i + 1] =
-			data[i + 2] =
-				0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+		data[i] = data[i + 1] = data[i + 2] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
 
 		// Reduce color palette
 		data[i] =
@@ -124,10 +121,7 @@ export function applyFilters(
 	return newImgData;
 }
 
-export function generateArrayOfArraysOfDiceSideValues(
-	imgData: ImageData,
-	diceSidesCount: DiceSidesCount
-): number[][] {
+export function generateArrayOfArraysOfDiceSideValues(imgData: ImageData, diceSidesCount: DiceSidesCount): number[][] {
 	const { width, height, data } = imgData;
 	const matrix = [];
 

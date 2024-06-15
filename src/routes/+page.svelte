@@ -5,7 +5,7 @@
 		cloneImageData,
 		createImage,
 		readFileAsDataUrl,
-		withOffscreenCanvas
+		withOffscreenCanvas,
 	} from '$lib/canvasUtils';
 	import { useLocalStorageRune, type Valuable } from '$lib/runes.svelte';
 	import Cropper from 'svelte-easy-crop';
@@ -23,15 +23,12 @@
 	enum DiceColor {
 		White,
 		Black,
-		Both
+		Both,
 	}
 
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
-	const imgString_original: Valuable<string | null> = useLocalStorageRune(
-		`${LS_PREFIX}imgStringOriginal`,
-		null
-	);
+	const imgString_original: Valuable<string | null> = useLocalStorageRune(`${LS_PREFIX}imgStringOriginal`, null);
 	let imgElement_original: HTMLImageElement | null = $state(null);
 	const cropArea: Valuable<CropArea | null> = useLocalStorageRune(`${LS_PREFIX}cropArea`, null);
 
@@ -44,9 +41,7 @@
 	});
 
 	let imgData_cropped: ImageData | null = $derived(
-		imgElement_original && cropArea.value
-			? getCroppedImg(imgElement_original, cropArea.value)
-			: null
+		imgElement_original && cropArea.value ? getCroppedImg(imgElement_original, cropArea.value) : null
 	);
 
 	const lockOriginalImageAspectRatio: Valuable<boolean> = useLocalStorageRune(
@@ -58,14 +53,8 @@
 		return imgElement_original ? imgElement_original.width / imgElement_original.height : null;
 	});
 
-	const diceCountHorizontal: Valuable<number> = useLocalStorageRune(
-		`${LS_PREFIX}diceCountHorizontal`,
-		100
-	);
-	const diceCountVertical: Valuable<number> = useLocalStorageRune(
-		`${LS_PREFIX}diceCountVertical`,
-		60
-	);
+	const diceCountHorizontal: Valuable<number> = useLocalStorageRune(`${LS_PREFIX}diceCountHorizontal`, 100);
+	const diceCountVertical: Valuable<number> = useLocalStorageRune(`${LS_PREFIX}diceCountVertical`, 60);
 
 	let diceCountVerticalEffective: number | null = $derived.by(() => {
 		if (!lockOriginalImageAspectRatio.value) {
@@ -80,20 +69,13 @@
 	});
 
 	let diceAspectRatio: number | undefined = $derived(
-		diceCountVerticalEffective === null
-			? undefined
-			: diceCountHorizontal.value / diceCountVerticalEffective
+		diceCountVerticalEffective === null ? undefined : diceCountHorizontal.value / diceCountVerticalEffective
 	);
 	let diceCountTotal: number | null = $derived(
-		diceCountVerticalEffective === null
-			? null
-			: diceCountHorizontal.value * diceCountVerticalEffective
+		diceCountVerticalEffective === null ? null : diceCountHorizontal.value * diceCountVerticalEffective
 	);
 
-	const diceColor: Valuable<DiceColor> = useLocalStorageRune(
-		`${LS_PREFIX}diceColor`,
-		DiceColor.Both
-	);
+	const diceColor: Valuable<DiceColor> = useLocalStorageRune(`${LS_PREFIX}diceColor`, DiceColor.Both);
 
 	let diceSidesCount: DiceSidesCount = $derived(
 		diceColor.value === DiceColor.Both ? DiceSidesCount.Twelve : DiceSidesCount.Six
@@ -110,13 +92,10 @@
 
 		const canvas = withOffscreenCanvas(imgData_cropped, (_ctx, canvas) => canvas);
 
-		return withOffscreenCanvas(
-			{ width: diceCountHorizontal.value, height: diceCountVerticalEffective },
-			(ctx) => {
-				ctx.drawImage(canvas, 0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
-				return ctx.getImageData(0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
-			}
-		);
+		return withOffscreenCanvas({ width: diceCountHorizontal.value, height: diceCountVerticalEffective }, (ctx) => {
+			ctx.drawImage(canvas, 0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
+			return ctx.getImageData(0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
+		});
 	});
 
 	let imgData_cropped_resized_filtered: ImageData | null = $derived.by(() => {
@@ -128,7 +107,7 @@
 			brightness: brightness.value,
 			contrast: contrast.value,
 			gamma: gamma.value,
-			diceSidesCount
+			diceSidesCount,
 		});
 	});
 
@@ -149,16 +128,14 @@
 		}
 	});
 
-	const persistUploadedImage = async (
-		event: Event & { currentTarget: EventTarget & HTMLInputElement }
-	) => {
+	const persistUploadedImage = async (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
 		const imgString = await readFileAsDataUrl(event.currentTarget?.files);
 		imgElement_original = await createImage(imgString);
 		cropArea.value = {
 			x: 0,
 			y: 0,
 			width: imgElement_original.width,
-			height: imgElement_original.height
+			height: imgElement_original.height,
 		};
 		imgString_original.value = imgString; // should populate after image is loaded inside `createImage`, in order to avoid a race condition
 	};
