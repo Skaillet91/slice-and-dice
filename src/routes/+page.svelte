@@ -7,7 +7,10 @@
 		readFileAsDataUrl,
 		withOffscreenCanvas
 	} from '$lib/canvasUtils';
+	import { useLocalStorageRune, type Valuable } from '$lib/runes.svelte';
 	import Cropper from 'svelte-easy-crop';
+
+	const LS_PREFIX = 'slice-and-dice__';
 
 	// ToDo: Import from svelte-easy-crop somehow
 	interface CropArea {
@@ -25,53 +28,80 @@
 
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
-	let imgString_original: string | null = $state(null);
+	const imgString_original: Valuable<string | null> = useLocalStorageRune(
+		`${LS_PREFIX}imgStringOriginal`,
+		null
+	);
 	let imgElement_original: HTMLImageElement | null = $state(null);
-	let cropArea: CropArea | null = $state(null);
+	const cropArea: Valuable<CropArea | null> = useLocalStorageRune(`${LS_PREFIX}cropArea`, null);
+
+	// Restoring image from local storage
+	// @ts-ignore Intentionally using async here: all state values are touched above await.
+	$effect(async () => {
+		if (imgString_original.value && !imgElement_original) {
+			imgElement_original = await createImage(imgString_original.value);
+		}
+	});
 
 	let imgData_cropped: ImageData | null = $derived(
-		imgElement_original && cropArea ? getCroppedImg(imgElement_original, cropArea) : null
+		imgElement_original && cropArea.value
+			? getCroppedImg(imgElement_original, cropArea.value)
+			: null
 	);
 
-	let lockOriginalImageAspectRatio: boolean = $state(true);
+	const lockOriginalImageAspectRatio: Valuable<boolean> = useLocalStorageRune(
+		`${LS_PREFIX}lockOriginalImageAspectRatio`,
+		true
+	);
 
 	let originalImageAspectRatio: number | null = $derived.by(() => {
 		return imgElement_original ? imgElement_original.width / imgElement_original.height : null;
 	});
 
-	let diceCountHorizontal: number = $state(100);
-	let diceCountVertical: number = $state(60);
+	const diceCountHorizontal: Valuable<number> = useLocalStorageRune(
+		`${LS_PREFIX}diceCountHorizontal`,
+		100
+	);
+	const diceCountVertical: Valuable<number> = useLocalStorageRune(
+		`${LS_PREFIX}diceCountVertical`,
+		60
+	);
 
 	let diceCountVerticalEffective: number | null = $derived.by(() => {
-		if (!lockOriginalImageAspectRatio) {
-			return diceCountVertical;
+		if (!lockOriginalImageAspectRatio.value) {
+			return diceCountVertical.value;
 		}
 
 		if (originalImageAspectRatio === null) {
 			return null;
 		}
 
-		return Math.round(diceCountHorizontal / originalImageAspectRatio);
+		return Math.round(diceCountHorizontal.value / originalImageAspectRatio);
 	});
 
 	let diceAspectRatio: number | undefined = $derived(
 		diceCountVerticalEffective === null
 			? undefined
-			: diceCountHorizontal / diceCountVerticalEffective
+			: diceCountHorizontal.value / diceCountVerticalEffective
 	);
 	let diceCountTotal: number | null = $derived(
-		diceCountVerticalEffective === null ? null : diceCountHorizontal * diceCountVerticalEffective
+		diceCountVerticalEffective === null
+			? null
+			: diceCountHorizontal.value * diceCountVerticalEffective
 	);
 
-	let diceColor: DiceColor = $state(DiceColor.Both);
+	const diceColor: Valuable<DiceColor> = useLocalStorageRune(
+		`${LS_PREFIX}diceColor`,
+		DiceColor.Both
+	);
 
 	let diceSidesCount: DiceSidesCount = $derived(
-		diceColor === DiceColor.Both ? DiceSidesCount.Twelve : DiceSidesCount.Six
+		diceColor.value === DiceColor.Both ? DiceSidesCount.Twelve : DiceSidesCount.Six
 	);
 
-	let brightness = $state(100);
-	let contrast = $state(100);
-	let gamma = $state(100);
+	const brightness: Valuable<number> = useLocalStorageRune(`${LS_PREFIX}brightness`, 100);
+	const contrast: Valuable<number> = useLocalStorageRune(`${LS_PREFIX}contrast`, 100);
+	const gamma: Valuable<number> = useLocalStorageRune(`${LS_PREFIX}gamma`, 100);
 
 	let imgData_cropped_resized: ImageData | null = $derived.by(() => {
 		if (!imgData_cropped || !diceCountVerticalEffective) {
@@ -81,10 +111,10 @@
 		const canvas = withOffscreenCanvas(imgData_cropped, (_ctx, canvas) => canvas);
 
 		return withOffscreenCanvas(
-			{ width: diceCountHorizontal, height: diceCountVerticalEffective },
+			{ width: diceCountHorizontal.value, height: diceCountVerticalEffective },
 			(ctx) => {
-				ctx.drawImage(canvas, 0, 0, diceCountHorizontal, diceCountVerticalEffective);
-				return ctx.getImageData(0, 0, diceCountHorizontal, diceCountVerticalEffective);
+				ctx.drawImage(canvas, 0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
+				return ctx.getImageData(0, 0, diceCountHorizontal.value, diceCountVerticalEffective);
 			}
 		);
 	});
@@ -94,7 +124,12 @@
 			return null;
 		}
 
-		return applyFilters(imgData_cropped_resized, { brightness, contrast, gamma, diceSidesCount });
+		return applyFilters(imgData_cropped_resized, {
+			brightness: brightness.value,
+			contrast: contrast.value,
+			gamma: gamma.value,
+			diceSidesCount
+		});
 	});
 
 	$effect(() => {
@@ -114,15 +149,19 @@
 		}
 	});
 
-
-	async function persistUploadedImage(
+	const persistUploadedImage = async (
 		event: Event & { currentTarget: EventTarget & HTMLInputElement }
-	) {
+	) => {
 		const imgString = await readFileAsDataUrl(event.currentTarget?.files);
 		imgElement_original = await createImage(imgString);
-		cropArea = { x: 0, y: 0, width: imgElement_original.width, height: imgElement_original.height };
-		imgString_original = imgString; // should populate after image is loaded inside `createImage`, in order to avoid a race condition
-	}
+		cropArea.value = {
+			x: 0,
+			y: 0,
+			width: imgElement_original.width,
+			height: imgElement_original.height
+		};
+		imgString_original.value = imgString; // should populate after image is loaded inside `createImage`, in order to avoid a race condition
+	};
 
 	function persistCropArea(
 		e: CustomEvent<{
@@ -130,7 +169,7 @@
 			pixels: CropArea;
 		}>
 	) {
-		cropArea = e.detail.pixels;
+		cropArea.value = e.detail.pixels;
 	}
 </script>
 
@@ -153,7 +192,7 @@
 	<span>Original image aspect ratio:</span>
 	<span>{originalImageAspectRatio ? Math.round(originalImageAspectRatio * 100) / 100 : null}</span>
 	<label>
-		<input type="checkbox" bind:checked={lockOriginalImageAspectRatio} />
+		<input type="checkbox" bind:checked={lockOriginalImageAspectRatio.value} />
 		Lock
 	</label>
 </div>
@@ -161,8 +200,8 @@
 <div>
 	<label>
 		<span>Dice count horizontal</span>
-		<input type="number" min="1" bind:value={diceCountHorizontal} />
-		<input type="range" min="1" max="200" bind:value={diceCountHorizontal} />
+		<input type="number" min="1" bind:value={diceCountHorizontal.value} />
+		<input type="range" min="1" max="200" bind:value={diceCountHorizontal.value} />
 	</label>
 </div>
 
@@ -173,16 +212,16 @@
 			type="number"
 			min="1"
 			value={diceCountVerticalEffective}
-			disabled={lockOriginalImageAspectRatio}
-			oninput={(e) => diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
+			disabled={lockOriginalImageAspectRatio.value}
+			oninput={(e) => diceCountVertical.value = parseInt((e.target as HTMLInputElement).value, 10)}
 		/>
 		<input
 			type="range"
 			min="1"
 			max="200"
 			value={diceCountVerticalEffective}
-			disabled={lockOriginalImageAspectRatio}
-			oninput={(e) => diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
+			disabled={lockOriginalImageAspectRatio.value}
+			oninput={(e) => diceCountVertical.value = parseInt((e.target as HTMLInputElement).value, 10)}
 		/>
 	</label>
 </div>
@@ -190,15 +229,15 @@
 <div>
 	<label>
 		<span>Dice color</span>
-		<input type="radio" name="dice color" value={DiceColor.White} bind:group={diceColor} />
+		<input type="radio" name="dice color" value={DiceColor.White} bind:group={diceColor.value} />
 		White
 	</label>
 	<label>
-		<input type="radio" name="dice color" value={DiceColor.Black} bind:group={diceColor} />
+		<input type="radio" name="dice color" value={DiceColor.Black} bind:group={diceColor.value} />
 		Black
 	</label>
 	<label>
-		<input type="radio" name="dice color" value={DiceColor.Both} bind:group={diceColor} />
+		<input type="radio" name="dice color" value={DiceColor.Both} bind:group={diceColor.value} />
 		Both
 	</label>
 </div>
@@ -216,31 +255,31 @@
 <div>
 	<label>
 		<span>Brightness</span>
-		<input type="number" min="0" bind:value={brightness} />
-		<input type="range" min="0" max="200" bind:value={brightness} />
+		<input type="number" min="0" bind:value={brightness.value} />
+		<input type="range" min="0" max="200" bind:value={brightness.value} />
 	</label>
 </div>
 
 <div>
 	<label>
 		<span>Contrast</span>
-		<input type="number" min="0" bind:value={contrast} />
-		<input type="range" min="0" max="200" bind:value={contrast} />
+		<input type="number" min="0" bind:value={contrast.value} />
+		<input type="range" min="0" max="200" bind:value={contrast.value} />
 	</label>
 </div>
 
 <div>
 	<label>
 		<span>Gamma</span>
-		<input type="number" min="0" bind:value={gamma} />
-		<input type="range" min="0" max="200" bind:value={gamma} />
+		<input type="number" min="0" bind:value={gamma.value} />
+		<input type="range" min="0" max="200" bind:value={gamma.value} />
 	</label>
 </div>
 
-{#if imgString_original}
+{#if imgString_original.value}
 	<div style="position: relative; width: 100%; height: 300px;">
 		<Cropper
-			image={imgString_original}
+			image={imgString_original.value}
 			crop={{ x: 0, y: 0 }}
 			aspect={diceAspectRatio}
 			on:cropcomplete={persistCropArea}
@@ -250,7 +289,7 @@
 
 <canvas
 	bind:this={canvas}
-	width={diceCountHorizontal}
+	width={diceCountHorizontal.value}
 	height={diceCountVerticalEffective}
 	style="width: 500px; height: auto; image-rendering: pixelated;"
 ></canvas>
