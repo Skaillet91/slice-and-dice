@@ -1,10 +1,6 @@
+import type { DiceSidesCount } from './dicer.svelte';
+
 // https://codesandbox.io/p/sandbox/svelte-easy-crop-with-file-upload-and-live-preview-36xsr?file=%2FcanvasUtils.js
-
-export enum DiceSidesCount {
-	Six = 6,
-	Twelve = 12,
-}
-
 export const createImage = (url: string): Promise<HTMLImageElement> => {
 	return new Promise((resolve, reject) => {
 		const image = new Image();
@@ -15,7 +11,7 @@ export const createImage = (url: string): Promise<HTMLImageElement> => {
 	});
 };
 
-export function readFileAsDataUrl(files: FileList | null): Promise<string> {
+export const readFileAsDataUrl = (files: FileList | null): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		const file = files?.[0];
 
@@ -40,12 +36,12 @@ export function readFileAsDataUrl(files: FileList | null): Promise<string> {
 
 		reader.readAsDataURL(file);
 	});
-}
+};
 
-export function withOffscreenCanvas<T>(
+export const withOffscreenCanvas = <T>(
 	data: HTMLImageElement | ImageData | { width: number; height: number },
 	callback: (ctx: OffscreenCanvasRenderingContext2D, canvas: OffscreenCanvas) => T
-): T {
+): T => {
 	const canvas = new OffscreenCanvas(data.width, data.height);
 
 	const ctx = canvas.getContext('2d');
@@ -61,16 +57,16 @@ export function withOffscreenCanvas<T>(
 	}
 
 	return callback(ctx, canvas);
-}
+};
 
-export function cloneImageData(imgData: ImageData): ImageData {
+export const cloneImageData = (imgData: ImageData): ImageData => {
 	const newImgDataData = new Uint8ClampedArray(imgData.data);
 	return new ImageData(newImgDataData, imgData.width, imgData.height, {
 		colorSpace: imgData.colorSpace,
 	});
-}
+};
 
-export function applyFilters(
+export const applyFilters = (
 	imgData: ImageData,
 	{
 		brightness,
@@ -78,12 +74,9 @@ export function applyFilters(
 		gamma,
 		diceSidesCount,
 	}: { brightness: number; contrast: number; gamma: number; diceSidesCount: DiceSidesCount }
-): ImageData {
+): ImageData => {
 	const newImgData = cloneImageData(imgData);
 	const { data } = newImgData;
-
-	console.log('contrast', contrast);
-
 	const contrastFactor = (259 * (contrast - 100 + 255)) / (255 * (259 - (contrast - 100)));
 	const brightnessFactor = brightness / 100;
 	const gammaCorrection = 1 / (gamma / 100);
@@ -119,9 +112,12 @@ export function applyFilters(
 	}
 
 	return newImgData;
-}
+};
 
-export function generateArrayOfArraysOfDiceSideValues(imgData: ImageData, diceSidesCount: DiceSidesCount): number[][] {
+export const generateArrayOfArraysOfDiceSideValues = (
+	imgData: ImageData,
+	diceSidesCount: DiceSidesCount
+): number[][] => {
 	const { width, height, data } = imgData;
 	const matrix = [];
 
@@ -138,12 +134,12 @@ export function generateArrayOfArraysOfDiceSideValues(imgData: ImageData, diceSi
 	}
 
 	return matrix;
-}
+};
 
-export default function getCroppedImg(
+const getCroppedImg = (
 	image: HTMLImageElement,
 	pixelCrop: { x: number; y: number; width: number; height: number }
-): ImageData /* Promise<string | null> */ {
+): ImageData => {
 	if (!image.complete) {
 		throw new Error('This is a sync function. It expects the image to be fully loaded.');
 	}
@@ -154,3 +150,5 @@ export default function getCroppedImg(
 		return ctx.getImageData(pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height);
 	});
 }
+
+export default getCroppedImg;
