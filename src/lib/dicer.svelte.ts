@@ -1,4 +1,4 @@
-import getCroppedImg, { applyFilters, createImage, withOffscreenCanvas } from './canvasUtils';
+import getCroppedImg, { applyFilters, createImage, withOffscreenCanvas } from './canvas-utils';
 import assert from 'tiny-invariant';
 import z from 'zod';
 

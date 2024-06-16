@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { readFileAsDataUrl } from '$lib/canvasUtils';
+	import { readFileAsDataUrl } from '$lib/canvas-utils';
 	import DicerService, { DiceColor, DiceSidesCount, type CropArea } from '$lib/dicer.svelte';
 	import { useLocalStorageRune, type Valuable } from '$lib/runes.svelte';
 	import { getContext } from 'svelte';
