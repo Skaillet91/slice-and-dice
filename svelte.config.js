@@ -14,6 +14,11 @@ const config = {
 		adapter: adapter({
 			fallback: '200.html', // may differ from host to host
 		}),
+
+		// https://panda-css.com/docs/installation/svelte
+		alias: {
+			'styled-system': './styled-system/*',
+		},
 	},
 };
 

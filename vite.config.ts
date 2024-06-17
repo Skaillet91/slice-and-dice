@@ -6,4 +6,11 @@ export default defineConfig({
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 	},
+
+	// https://panda-css.com/docs/installation/svelte
+  server: {
+    fs: {
+      allow: ['styled-system'],
+    },
+  },
 });

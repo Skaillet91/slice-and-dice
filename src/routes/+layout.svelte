@@ -1,4 +1,6 @@
 <script lang="ts">
+  import '../app.css';
+
 	import DicerService from '$lib/dicer.svelte';
 	import { setContext } from 'svelte';
 
