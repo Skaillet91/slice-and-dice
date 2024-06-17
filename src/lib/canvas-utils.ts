@@ -114,28 +114,6 @@ export const applyFilters = (
 	return newImgData;
 };
 
-export const generateArrayOfArraysOfDiceSideValues = (
-	imgData: ImageData,
-	diceSidesCount: DiceSidesCount
-): number[][] => {
-	const { width, height, data } = imgData;
-	const matrix = [];
-
-	for (let y = 0; y < height; y++) {
-		const row = [];
-		for (let x = 0; x < width; x++) {
-			const index = (y * width + x) * 4; // Calculate the index for the red component (the image should be grey, so all color components should be the same)
-			const redValue = data[index]; // Get the red component
-			const diceSideValueRaw = Math.round(redValue / diceSidesCount); // Calculate the dice side value
-			const diceSideValue = Math.max(1, Math.min(diceSideValueRaw, 12)); // Ensure the value is within [1, 12]
-			row.push(diceSideValue);
-		}
-		matrix.push(row);
-	}
-
-	return matrix;
-};
-
 const getCroppedImg = (
 	image: HTMLImageElement,
 	pixelCrop: { x: number; y: number; width: number; height: number }

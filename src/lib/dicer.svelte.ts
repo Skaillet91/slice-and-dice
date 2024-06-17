@@ -1,6 +1,11 @@
-import getCroppedImg, { applyFilters, createImage, withOffscreenCanvas } from './canvas-utils';
+import getCroppedImg, {
+	applyFilters,
+	createImage,
+	withOffscreenCanvas,
+} from './canvas-utils';
 import assert from 'tiny-invariant';
 import z from 'zod';
+import { generateDiceDensityMatrix } from './dice-utils';
 
 export const DICER_LS_KEY = 'dicer';
 
@@ -165,6 +170,14 @@ export default class DicerService {
 			contrast: this.contrast,
 			gamma: this.gamma,
 		};
+	});
+
+	diceDensityMatrix: number[][] | null = $derived.by(() => {
+		if (!this.imgData_cropped_resized_filtered) {
+			return null;
+		}
+
+		return generateDiceDensityMatrix(this.imgData_cropped_resized_filtered, this.availableDiceSidesCount);
 	});
 
 	//
