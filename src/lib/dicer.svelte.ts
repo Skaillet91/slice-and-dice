@@ -63,8 +63,8 @@ export default class DicerService {
 	imgString_original: string | null = $state(null); // ToDo: make readonly. Can only modify through importImage() method
 	cropArea: CropArea | null = $state(null);
 	lockAspectRatioOriginal: boolean = $state(true);
-	diceCountHorizontal: number = $state(100);
-	diceCountVertical: number = $state(60);
+	diceCountHorizontal: number = $state(50);
+	diceCountVertical: number = $state(50);
 	diceColor: DiceColor = $state(DiceColor.Both);
 	brightness: number = $state(100);
 	contrast: number = $state(100);
