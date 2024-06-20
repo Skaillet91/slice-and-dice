@@ -7,6 +7,8 @@
 	import { getContext } from 'svelte';
 	import Cropper from 'svelte-easy-crop';
 	import assert from 'tiny-invariant';
+	import * as Accordion from '$lib/components/ui/accordion';
+	import { slide } from 'svelte/transition';
 
 	const dicer = getContext<DicerService>('service:dicer');
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -42,10 +44,43 @@
 
 <div
 	class={css({
-		display: 'flex'
+		display: 'flex',
 	})}
 >
 	<div>
+		<Accordion.Root class={css({ w: 'full', sm: { maxW: '70%' } })} value={['image']}>
+			<Accordion.Item value="image" class={css({ borderBottomWidth: '1px', pl: '1.5', pr: '1.5' })}>
+				<Accordion.Trigger>
+					Image properties
+
+					<!-- <span
+						class={css({
+							display: 'inline-flex',
+							alignItems: 'center',
+							justifyContent: 'center',
+							rounded: '7px',
+							bgColor: 'transparent',
+							transitionProperty: 'all',
+							transitionTimingFunction: 'all',
+							transitionDuration: 'all',
+						})}
+					>
+						<ChevronDownIcon
+							class={css({ transitionProperty: 'all', transitionTimingFunction: 'all', transitionDuration: '200' })}
+						/>
+					</span> -->
+				</Accordion.Trigger>
+
+				<Accordion.Content
+					transition={slide}
+					transitionConfig={{ duration: 200 }}
+					class={css({ pb: '25px', fontSize: 'sm', lineHeight: 'sm', letterSpacing: '.0.01em' })}
+				>
+					asdf
+				</Accordion.Content>
+			</Accordion.Item>
+		</Accordion.Root>
+
 		<p>
 			<label for="file">
 				<input
