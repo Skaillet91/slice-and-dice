@@ -23,23 +23,23 @@ export const generateDiceDensityMatrix = (imgData: ImageData, diceSidesCount: Di
 const DensitySchema = z.number().int().min(1).max(12);
 
 export const getDieValue = (density: number, diceColor: DiceColor): { dieColor: DiceColor; dieValue: number } => {
-  const densityEffective = DensitySchema.parse(density);
+	const densityEffective = DensitySchema.parse(density);
 
-  if (diceColor === DiceColor.White) {
-    return { dieColor: diceColor, dieValue: 7 - densityEffective };
-  }
-  
-  if (diceColor === DiceColor.Black) {
-    return { dieColor: diceColor, dieValue: densityEffective };
-  }
-  
-  if (diceColor === DiceColor.Both) {
-    if (densityEffective >= 1 && densityEffective <= 6) {
-      return { dieColor: DiceColor.Black, dieValue: densityEffective };
-    } else {
-      return { dieColor: DiceColor.White, dieValue: 13 - densityEffective };
-    }
-  }
+	if (diceColor === DiceColor.White) {
+		return { dieColor: diceColor, dieValue: 7 - densityEffective };
+	}
 
-  assert(false, 'This code should be unreachable');
+	if (diceColor === DiceColor.Black) {
+		return { dieColor: diceColor, dieValue: densityEffective };
+	}
+
+	if (diceColor === DiceColor.Both) {
+		if (densityEffective >= 1 && densityEffective <= 6) {
+			return { dieColor: DiceColor.Black, dieValue: densityEffective };
+		} else {
+			return { dieColor: DiceColor.White, dieValue: 13 - densityEffective };
+		}
+	}
+
+	assert(false, 'This code should be unreachable');
 };

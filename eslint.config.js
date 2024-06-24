@@ -3,6 +3,7 @@ import ts from 'typescript-eslint';
 import svelte from 'eslint-plugin-svelte';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import eslintPluginReadableTailwind from 'eslint-plugin-readable-tailwind';
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
@@ -28,6 +29,20 @@ export default [
 		},
 	},
 	{
-		ignores: ['build/', '.svelte-kit/', 'dist/'],
+		ignores: ['build/', '.svelte-kit/', 'dist/', '.vercel/', '.pnpm-store/', 'styled-system/', 'styled-system-studio/'],
+	},
+	{
+		plugins: {
+			'readable-tailwind': eslintPluginReadableTailwind,
+		},
+		rules: {
+			// enable all recommended rules to warn
+			...eslintPluginReadableTailwind.configs.warning.rules,
+			// enable all recommended rules to error
+			...eslintPluginReadableTailwind.configs.error.rules,
+
+			// or configure rules individually
+			'readable-tailwind/multiline': ['warn', { printWidth: 100 }],
+		},
 	},
 ];

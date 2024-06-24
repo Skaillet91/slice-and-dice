@@ -8,9 +8,9 @@ export default defineConfig({
 	},
 
 	// https://panda-css.com/docs/installation/svelte
-  server: {
-    fs: {
-      allow: ['styled-system'],
-    },
-  },
+	server: {
+		fs: {
+			allow: ['styled-system'],
+		},
+	},
 });

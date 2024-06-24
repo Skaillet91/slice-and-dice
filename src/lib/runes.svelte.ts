@@ -17,7 +17,7 @@ export const reusableStateRune = <StoredValue>(initialValue: StoredValue): Valua
 
 		set value(newValue: StoredValue) {
 			_value = newValue;
-		}
+		},
 	};
 };
 

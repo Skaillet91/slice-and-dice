@@ -2,7 +2,6 @@
 	import { css } from 'styled-system/css';
 	import { DiceColor } from '$lib/dicer.svelte';
 	import { getDieValue } from '$lib/dice-utils';
-	import { token } from 'styled-system/tokens';
 
 	let { diceDensityMatrix, diceColor }: { diceDensityMatrix: number[][]; diceColor: DiceColor } = $props();
 
@@ -11,12 +10,7 @@
 	// });
 </script>
 
-{#snippet die({
-  dieValue,
-  dieColor,
-  dotRadius = 16,
-  singleDotRadius = 20
-})}
+{#snippet die({ dieValue, dieColor, dotRadius = 16, singleDotRadius = 20 })}
 	{@const dotColor = dieColor === DiceColor.White ? 'black' : 'white'}
 	<div
 		data-die-color={dieColor}
@@ -94,9 +88,9 @@
 	})}
 >
 	<tbody>
-		{#each diceDensityMatrix as diceDensityRow, i}
+		{#each diceDensityMatrix as diceDensityRow}
 			<tr>
-				{#each diceDensityRow as dieDensity, j}
+				{#each diceDensityRow as dieDensity}
 					{@const { dieColor, dieValue } = getDieValue(dieDensity, diceColor)}
 
 					<td>

@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { readFileAsDataUrl } from '$lib/canvas-utils';
 	import DiceTable from '$lib/components/dice-table.svelte';
-	import DicerService, { DiceColor, DiceSidesCount, type CropArea } from '$lib/dicer.svelte';
-	import { useLocalStorageRune, type Valuable } from '$lib/runes.svelte';
-	import { css } from 'styled-system/css';
+	import DicerService, { DiceColor, type CropArea } from '$lib/dicer.svelte';
 	import { getContext } from 'svelte';
 	import Cropper from 'svelte-easy-crop';
 	import assert from 'tiny-invariant';
-	import * as Accordion from '$lib/components/ui/accordion';
-	import { slide } from 'svelte/transition';
+
+	import * as Accordion from '$lib/components/ui/accordion/index.js';
+	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import Field from '$lib/components/ui/field.svelte';
+	import * as RadioGroup from '$lib/components/ui/radio-group';
 
 	const dicer = getContext<DicerService>('service:dicer');
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -42,168 +45,196 @@
 	};
 </script>
 
-<div
-	class={css({
-		display: 'flex',
-	})}
+<main
+	class="
+   block p-4
+
+   lg:flex lg:space-x-8
+ "
 >
-	<div>
-		<Accordion.Root class={css({ w: 'full', sm: { maxW: '70%' } })} value={['image']}>
-			<Accordion.Item value="image" class={css({ borderBottomWidth: '1px', pl: '1.5', pr: '1.5' })}>
-				<Accordion.Trigger>
-					Image properties
+	<div
+		class="
+    w-full
 
-					<!-- <span
-						class={css({
-							display: 'inline-flex',
-							alignItems: 'center',
-							justifyContent: 'center',
-							rounded: '7px',
-							bgColor: 'transparent',
-							transitionProperty: 'all',
-							transitionTimingFunction: 'all',
-							transitionDuration: 'all',
-						})}
-					>
-						<ChevronDownIcon
-							class={css({ transitionProperty: 'all', transitionTimingFunction: 'all', transitionDuration: '200' })}
+    lg:w-1/4
+  "
+	>
+		<Accordion.Root multiple value={['image', 'mosaic', 'color']}>
+			<Accordion.Item value="image">
+				<Accordion.Trigger>Source Image</Accordion.Trigger>
+
+				<Accordion.Content>
+					<Field>
+						<Label for="file">Upload your file</Label>
+
+						<Input
+							type="file"
+							name="file"
+							accept={authorizedExtensions.join(',')}
+							required
+							onchange={persistUploadedImage}
 						/>
-					</span> -->
-				</Accordion.Trigger>
+					</Field>
 
-				<Accordion.Content
-					transition={slide}
-					transitionConfig={{ duration: 200 }}
-					class={css({ pb: '25px', fontSize: 'sm', lineHeight: 'sm', letterSpacing: '.0.01em' })}
-				>
-					asdf
+					{#if dicer.imgString_original}
+						<div style="position: relative; width: 100%; height: 300px;">
+							<Cropper
+								image={dicer.imgString_original}
+								crop={{ x: 0, y: 0 }}
+								aspect={dicer.aspectRatioDice}
+								on:cropcomplete={persistCropArea}
+							/>
+						</div>
+					{/if}
+				</Accordion.Content>
+			</Accordion.Item>
+
+			<Accordion.Item value="mosaic">
+				<Accordion.Trigger>Mosaic</Accordion.Trigger>
+
+				<Accordion.Content>
+					<div class="space-y-4">
+						<Field>
+							<Label for="diceCountHorizontal">Dice count horizontal</Label>
+
+							<div class="flex gap-6">
+								<Input
+									class="w-20"
+									id="diceCountHorizontal"
+									type="number"
+									min="1"
+									bind:value={dicer.diceCountHorizontal}
+								/>
+
+								<Input type="range" min="1" max="200" bind:value={dicer.diceCountHorizontal} />
+							</div>
+						</Field>
+
+						<Field>
+							<Label for="diceCountVertical">Dice count vertical</Label>
+
+							<div class="flex gap-6">
+								<Input
+									class="w-20"
+									id="diceCountVertical"
+									type="number"
+									min="1"
+									value={dicer.diceCountVerticalEffective}
+									disabled={dicer.lockAspectRatioOriginal}
+									oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
+								/>
+
+								<Input
+									type="range"
+									min="1"
+									max="200"
+									value={dicer.diceCountVerticalEffective}
+									disabled={dicer.lockAspectRatioOriginal}
+									oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
+								/>
+							</div>
+						</Field>
+
+						<Field>
+							<Label>Aspect Ratio</Label>
+
+							<p>
+								{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}
+								({dicer.diceCountTotal} dice)
+							</p>
+
+							<p class="flex items-center space-x-2">
+								<Checkbox
+									id="lockAspectRatioOriginal"
+									bind:checked={dicer.lockAspectRatioOriginal}
+									aria-labelledby="lockAspectRatioOriginal-label"
+								/>
+
+								<Label id="lockAspectRatioOriginal-label" for="lockAspectRatioOriginal">
+									Use aspect ratio from source image
+								</Label>
+							</p>
+						</Field>
+
+						<Field>
+							<Label>Dice Color</Label>
+
+							<RadioGroup.Root class="flex space-x-4" bind:value={dicer.diceColor}>
+								<span class="inline-flex items-center space-x-2">
+									<RadioGroup.Item value={DiceColor.White} id="DiceColorWhite" />
+
+									<Label for="DiceColorWhite">White</Label>
+								</span>
+
+								<span class="inline-flex items-center space-x-2">
+									<RadioGroup.Item value={DiceColor.Black} id="DiceColorBlack" />
+
+									<Label for="DiceColorBlack">Black</Label>
+								</span>
+
+								<span class="flex items-center space-x-2">
+									<RadioGroup.Item value={DiceColor.Both} id="DiceColorBoth" />
+
+									<Label for="DiceColorBoth">Both</Label>
+								</span>
+							</RadioGroup.Root>
+						</Field>
+					</div>
+				</Accordion.Content>
+			</Accordion.Item>
+
+			<Accordion.Item value="color">
+				<Accordion.Trigger>Color Tweaks</Accordion.Trigger>
+
+				<Accordion.Content>
+					<div class="space-y-4">
+						<Field>
+							<Label for="Brightness">Brightness</Label>
+
+							<div class="flex gap-6">
+								<Input class="w-20" type="number" id="Brightness" min="0" bind:value={dicer.brightness} />
+
+								<Input type="range" min="0" max="200" bind:value={dicer.brightness} />
+							</div>
+						</Field>
+
+						<Field>
+							<Label for="Contrast">Contrast</Label>
+
+							<div class="flex gap-6">
+								<Input class="w-20" type="number" id="Contrast" min="0" bind:value={dicer.contrast} />
+
+								<Input type="range" min="0" max="200" bind:value={dicer.contrast} />
+							</div>
+						</Field>
+
+						<Field>
+							<Label for="Gamma">Gamma</Label>
+
+							<div class="flex gap-6">
+								<Input class="w-20" type="number" id="Gamma" min="0" bind:value={dicer.gamma} />
+
+								<Input type="range" min="0" max="200" bind:value={dicer.gamma} />
+							</div>
+						</Field>
+
+						<canvas
+							bind:this={canvas}
+							width={dicer.diceCountHorizontal}
+							height={dicer.diceCountVerticalEffective}
+							class="
+         w-full
+
+         [image-rendering:pixelated]
+       "
+						></canvas>
+					</div>
 				</Accordion.Content>
 			</Accordion.Item>
 		</Accordion.Root>
-
-		<p>
-			<label for="file">
-				<input
-					type="file"
-					id="file"
-					name="fileToUpload"
-					accept={authorizedExtensions.join(',')}
-					required
-					onchange={persistUploadedImage}
-				/>
-
-				<span>Upload your file</span>
-			</label>
-		</p>
-
-		<div>
-			<span>Original image aspect ratio:</span>
-			<span>{dicer.aspectRatioOriginal ? Math.round(dicer.aspectRatioOriginal * 100) / 100 : null}</span>
-			<label>
-				<input type="checkbox" bind:checked={dicer.lockAspectRatioOriginal} />
-				Lock
-			</label>
-		</div>
-
-		<div>
-			<label>
-				<span>Dice count horizontal</span>
-				<input type="number" min="1" bind:value={dicer.diceCountHorizontal} />
-				<input type="range" min="1" max="200" bind:value={dicer.diceCountHorizontal} />
-			</label>
-		</div>
-
-		<div>
-			<label>
-				<span>Dice count vertical</span>
-				<input
-					type="number"
-					min="1"
-					value={dicer.diceCountVerticalEffective}
-					disabled={dicer.lockAspectRatioOriginal}
-					oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
-				/>
-				<input
-					type="range"
-					min="1"
-					max="200"
-					value={dicer.diceCountVerticalEffective}
-					disabled={dicer.lockAspectRatioOriginal}
-					oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
-				/>
-			</label>
-		</div>
-
-		<div>
-			<label>
-				<span>Dice color</span>
-				<input type="radio" name="dice color" value={DiceColor.White} bind:group={dicer.diceColor} />
-				White
-			</label>
-			<label>
-				<input type="radio" name="dice color" value={DiceColor.Black} bind:group={dicer.diceColor} />
-				Black
-			</label>
-			<label>
-				<input type="radio" name="dice color" value={DiceColor.Both} bind:group={dicer.diceColor} />
-				Both
-			</label>
-		</div>
-
-		<div>
-			<span>Dice count total:</span>
-			<span>{dicer.diceCountTotal}</span>
-		</div>
-
-		<div>
-			<span>Dice aspect ratio:</span>
-			<span>{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}</span>
-		</div>
-
-		<div>
-			<label>
-				<span>Brightness</span>
-				<input type="number" min="0" bind:value={dicer.brightness} />
-				<input type="range" min="0" max="200" bind:value={dicer.brightness} />
-			</label>
-		</div>
-
-		<div>
-			<label>
-				<span>Contrast</span>
-				<input type="number" min="0" bind:value={dicer.contrast} />
-				<input type="range" min="0" max="200" bind:value={dicer.contrast} />
-			</label>
-		</div>
-
-		<div>
-			<label>
-				<span>Gamma</span>
-				<input type="number" min="0" bind:value={dicer.gamma} />
-				<input type="range" min="0" max="200" bind:value={dicer.gamma} />
-			</label>
-		</div>
-
-		{#if dicer.imgString_original}
-			<div style="position: relative; width: 100%; height: 300px;">
-				<Cropper
-					image={dicer.imgString_original}
-					crop={{ x: 0, y: 0 }}
-					aspect={dicer.aspectRatioDice}
-					on:cropcomplete={persistCropArea}
-				/>
-			</div>
-		{/if}
 	</div>
 
-	<canvas
-		bind:this={canvas}
-		width={dicer.diceCountHorizontal}
-		height={dicer.diceCountVerticalEffective}
-		style="width: 500px; height: auto; image-rendering: pixelated;"
-	></canvas>
-</div>
-
-{#if dicer.diceDensityMatrix}
-	<DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} />
-{/if}
+	{#if dicer.diceDensityMatrix}
+		<DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} />
+	{/if}
+</main>

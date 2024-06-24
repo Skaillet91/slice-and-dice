@@ -1,9 +1,4 @@
-import getCroppedImg, {
-	applyFilters,
-	createImage,
-	withOffscreenCanvas,
-} from './canvas-utils';
-import assert from 'tiny-invariant';
+import getCroppedImg, { applyFilters, createImage, withOffscreenCanvas } from './canvas-utils';
 import z from 'zod';
 import { generateDiceDensityMatrix } from './dice-utils';
 
@@ -93,11 +88,6 @@ export default class DicerService {
 	});
 
 	diceCountVerticalEffective: number | null = $derived.by(() => {
-		assert(
-			this.lockAspectRatioOriginal,
-			'diceCoutVerticalEffective is only available when lockAspectRatioOriginal is true.'
-		);
-
 		return this.aspectRatioOriginal === null
 			? null //
 			: Math.round(this.diceCountHorizontal / this.aspectRatioOriginal);

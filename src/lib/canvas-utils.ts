@@ -127,6 +127,6 @@ const getCroppedImg = (
 		// extract the cropped image using these values
 		return ctx.getImageData(pixelCrop.x, pixelCrop.y, pixelCrop.width, pixelCrop.height);
 	});
-}
+};
 
 export default getCroppedImg;

@@ -61,20 +61,20 @@ describe('getDieValue', () => {
 
 		errorTestCases.forEach(({ density, expectedErrorMessage }) => {
 			it(`should throw an error with message "${expectedErrorMessage}" when density is ${density}`, () => {
-        try {
-          getDieValue(density, DiceColor.White);
-          assert.fail('Expected an error to be thrown');
-        } catch(e) {
-          if(e instanceof Error && e.message === 'Expected an error to be thrown' ) {
-            throw e;
-          }
+				try {
+					getDieValue(density, DiceColor.White);
+					assert.fail('Expected an error to be thrown');
+				} catch (e) {
+					if (e instanceof Error && e.message === 'Expected an error to be thrown') {
+						throw e;
+					}
 
-          expect(e).toBeInstanceOf(ZodError);
+					expect(e).toBeInstanceOf(ZodError);
 
-          if (e instanceof ZodError) {
-            expect(e.issues[0].message).toBe(expectedErrorMessage);
-          }
-        }
+					if (e instanceof ZodError) {
+						expect(e.issues[0].message).toBe(expectedErrorMessage);
+					}
+				}
 			});
 		});
 	});
