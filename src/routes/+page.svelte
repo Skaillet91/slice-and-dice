@@ -20,13 +20,18 @@
 	$effect(() => {
 		const imgData = dicer.imgData_cropped_resized_filtered;
 
-		if (canvas && imgData) {
-			canvas.width = imgData.width;
-			canvas.height = imgData.height;
+		if (canvas) {
+			if (imgData) {
+				canvas.width = imgData.width;
+				canvas.height = imgData.height;
 
-			const ctx = canvas.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(imgData, 0, 0);
+				const ctx = canvas.getContext('2d');
+				assert(ctx, 'Expected `ctx` to exist at this point.');
+				ctx.putImageData(imgData, 0, 0);
+			} else {
+				canvas.width = 100;
+				canvas.height = 0;
+			}
 		}
 	});
 
@@ -59,7 +64,7 @@
     lg:w-1/4
   "
 	>
-		<Accordion.Root multiple value={['image', 'mosaic', 'color']}>
+		<Accordion.Root multiple value={['image', 'mosaic', 'color', 'planning']}>
 			<Accordion.Item value="image">
 				<Accordion.Trigger>Source Image</Accordion.Trigger>
 
@@ -223,11 +228,92 @@
 							width={dicer.diceCountHorizontal}
 							height={dicer.diceCountVerticalEffective}
 							class="
-         w-full
+								w-full
 
-         [image-rendering:pixelated]
-       "
+								[image-rendering:pixelated]
+							"
 						></canvas>
+					</div>
+				</Accordion.Content>
+			</Accordion.Item>
+
+			<Accordion.Item value="planning">
+				<Accordion.Trigger>Planning</Accordion.Trigger>
+
+				<Accordion.Content>
+					<div class="space-y-4">
+						<div class="flex space-x-4">
+							<Field>
+								<Label for="dieSize">Die size</Label>
+
+								<Input class="w-20" type="number" id="dieize" min="1" bind:value={dicer.dieSize} />
+							</Field>
+
+							<Field>
+								<Label for="glueSize">Glue thickness</Label>
+
+								<Input class="w-20" type="number" id="glueSize" min="0" step="0.05" bind:value={dicer.glueSize} />
+							</Field>
+						</div>
+
+						<div class="flex space-x-4">
+							<Field>
+								<Label>Mosaic width</Label>
+
+								<p>
+									{dicer.totalWidth} mm
+								</p>
+							</Field>
+
+							<Field>
+								<Label>Mosaic height</Label>
+
+								<p>
+									{dicer.totalHeight} mm
+								</p>
+							</Field>
+						</div>
+
+						<div class="flex space-x-4">
+							<Field>
+								<Label>White dice</Label>
+
+								<p>
+									{dicer.diceCountWhite}
+								</p>
+							</Field>
+
+							<Field>
+								<Label>Black dice</Label>
+
+								<p>
+									{dicer.diceCountBlack}
+								</p>
+							</Field>
+						</div>
+
+						<Field>
+							<Label for="dieSize">Dice Price</Label>
+
+							<div class="flex items-center space-x-2">
+								<Input class="w-20" type="number" id="diePricePerBatch" min="1" bind:value={dicer.dicePricePerBatch} />
+								<label for="diePricePerBatch">₽</label>
+								<span>per</span>
+								<Input class="w-20" type="number" id="dieBatchSize" min="1" bind:value={dicer.diceBatchSize} />
+								<label for="diePricePerBatch">dice</label>
+							</div>
+						</Field>
+
+						{#if dicer.totalPriceRoundedUpToBatch}
+							<Field>
+								<Label>Total Mosaic Price</Label>
+
+								<p>
+									{dicer.totalPriceRoundedUpToBatch} ₽ for {dicer.diceCountWhiteRoundedUpToBatch} white and {dicer.diceCountBlackRoundedUpToBatch}
+									black dice
+								</p>
+							</Field>
+						{/if}
 					</div>
 				</Accordion.Content>
 			</Accordion.Item>
