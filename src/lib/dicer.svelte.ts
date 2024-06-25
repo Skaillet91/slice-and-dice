@@ -42,6 +42,10 @@ export const DicerExportSchema = z.object({
 	brightness: z.number().min(0),
 	contrast: z.number().min(0),
 	gamma: z.number().min(0),
+	dieSize: z.number().min(1),
+	glueSize: z.number().min(0),
+	dicePricePerBatch: z.number().min(0.01),
+	diceBatchSize: z.number().min(1),
 });
 
 type DicerExport = z.infer<typeof DicerExportSchema>;
@@ -64,6 +68,10 @@ export default class DicerService {
 	brightness: number = $state(100);
 	contrast: number = $state(100);
 	gamma: number = $state(100);
+	dieSize: number = $state(8);
+	glueSize: number = $state(0.1);
+	dicePricePerBatch: number = $state(1500);
+	diceBatchSize: number = $state(1000);
 
 	//
 	/***************/
@@ -148,6 +156,22 @@ export default class DicerService {
 		});
 	});
 
+	totalWidth: number = $derived.by(() => {
+		const width = this.diceCountHorizontal * (this.dieSize + this.glueSize) - this.glueSize;
+
+		return Math.round(width * 10) / 10;
+	});
+
+	totalHeight: number | null = $derived.by(() => {
+		if (!this.diceCountVerticalEffective) {
+			return null;
+		}
+
+		const height = this.diceCountVerticalEffective * (this.dieSize + this.glueSize) - this.glueSize;
+
+		return Math.round(height * 10) / 10;
+	});
+
 	export: DicerExport = $derived.by(() => {
 		return {
 			imgString_original: this.imgString_original,
@@ -159,6 +183,10 @@ export default class DicerService {
 			brightness: this.brightness,
 			contrast: this.contrast,
 			gamma: this.gamma,
+			dieSize: this.dieSize,
+			glueSize: this.glueSize,
+			dicePricePerBatch: this.dicePricePerBatch,
+			diceBatchSize: this.diceBatchSize,
 		};
 	});
 
@@ -168,6 +196,81 @@ export default class DicerService {
 		}
 
 		return generateDiceDensityMatrix(this.imgData_cropped_resized_filtered, this.availableDiceSidesCount);
+	});
+
+	diceCountWhite: number | null = $derived.by(() => {
+		if (this.diceColor === DiceColor.White) {
+			return this.diceCountTotal;
+		}
+
+		if (this.diceColor === DiceColor.Black) {
+			return 0;
+		}
+
+		if (!this.diceDensityMatrix) {
+			return null;
+		}
+
+		return this.diceDensityMatrix.reduce((result: number, row: number[]) => {
+			return (
+				result +
+				row.reduce((result: number, density: number) => {
+					return result + (density >= 7 ? 1 : 0);
+				}, 0)
+			);
+		}, 0);
+	});
+
+	diceCountBlack: number | null = $derived.by(() => {
+		if (this.diceColor === DiceColor.White) {
+			return 0;
+		}
+
+		if (this.diceColor === DiceColor.Black) {
+			return this.diceCountTotal;
+		}
+
+		if (!this.diceDensityMatrix) {
+			return null;
+		}
+
+		return this.diceDensityMatrix.reduce((result: number, row: number[]) => {
+			return (
+				result +
+				row.reduce((result: number, density: number) => {
+					return result + (density <= 6 ? 1 : 0);
+				}, 0)
+			);
+		}, 0);
+	});
+
+	diceCountWhiteRoundedUpToBatch: number | null = $derived.by(() => {
+		if (this.diceCountWhite === null || this.diceBatchSize === 0) {
+			return null;
+		}
+		return Math.ceil(this.diceCountWhite / this.diceBatchSize) * this.diceBatchSize;
+	});
+
+	diceCountBlackRoundedUpToBatch: number | null = $derived.by(() => {
+		if (this.diceCountBlack === null || this.diceBatchSize === 0) {
+			return null;
+		}
+		return Math.ceil(this.diceCountBlack / this.diceBatchSize) * this.diceBatchSize;
+	});
+
+	diceCountTotalRoundedUpToBatch: number | null = $derived.by(() => {
+		if (this.diceCountWhiteRoundedUpToBatch === null || this.diceCountBlackRoundedUpToBatch === null) {
+			return null;
+		}
+
+		return this.diceCountWhiteRoundedUpToBatch + this.diceCountBlackRoundedUpToBatch;
+	});
+
+	totalPriceRoundedUpToBatch: number | null = $derived.by(() => {
+		if (this.diceCountTotalRoundedUpToBatch === null || this.dicePricePerBatch === 0) {
+			return null;
+		}
+		return (this.diceCountTotalRoundedUpToBatch / this.diceBatchSize) * this.dicePricePerBatch;
 	});
 
 	//
