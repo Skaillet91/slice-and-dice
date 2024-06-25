@@ -48,8 +48,7 @@
 				"vitest.explorer",
 				"macabeus.vscode-fluent",
 				"tomoki1207.vscode-input-sequence",
-				"EditorConfig.EditorConfig",
-				"hex-ci.stylelint-plus"
+				"EditorConfig.EditorConfig"
 			]
 		}
 	}
