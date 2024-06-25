@@ -18,16 +18,7 @@ npm create svelte@latest my-app
 
 ### Setting up the environment
 
-This project uses `mise` to pin Node version in the `.mise.toml` file and `corepack` to pin `pnpm` version in the `package.json` file. `mise` and `corepack` seem to be the most modern tools for this purpose, as of 2024. You don't need to use them, but then you'll have to sync Node and pnpm versions by hand.
-
-1. Install `mise` CLI: https://mise.jdx.dev/getting-started.html
-2. In the `slice-and-dice` project directory, run the following:
-
-   ```sh
-   mise install
-   corepack install
-   corepack enable
-   ```
+This project uses Dev Container. After checking out your project in VS Code, use "Reopen in Dev Container" palette action.
 
 ### Generic instructions
 
