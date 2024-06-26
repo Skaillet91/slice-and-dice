@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DiceColor, type DiceSidesCount } from './dicer.svelte';
+import { DiceColorObj, type DiceColorType, type DiceSidesCount, type Die } from './dicer.svelte';
 import assert from 'tiny-invariant';
 
 export const generateDiceDensityMatrix = (imgData: ImageData, diceSidesCount: DiceSidesCount): number[][] => {
@@ -22,22 +22,22 @@ export const generateDiceDensityMatrix = (imgData: ImageData, diceSidesCount: Di
 
 const DensitySchema = z.number().int().min(1).max(12);
 
-export const getDieValue = (density: number, diceColor: DiceColor): { dieColor: DiceColor; dieValue: number } => {
+export const getDieValue = (density: number, diceColor: DiceColorType): Die => {
 	const densityEffective = DensitySchema.parse(density);
 
-	if (diceColor === DiceColor.White) {
+	if (diceColor === DiceColorObj.White) {
 		return { dieColor: diceColor, dieValue: 7 - densityEffective };
 	}
 
-	if (diceColor === DiceColor.Black) {
+	if (diceColor === DiceColorObj.Black) {
 		return { dieColor: diceColor, dieValue: densityEffective };
 	}
 
-	if (diceColor === DiceColor.Both) {
+	if (diceColor === DiceColorObj.Both) {
 		if (densityEffective >= 1 && densityEffective <= 6) {
-			return { dieColor: DiceColor.Black, dieValue: densityEffective };
+			return { dieColor: DiceColorObj.Black, dieValue: densityEffective };
 		} else {
-			return { dieColor: DiceColor.White, dieValue: 13 - densityEffective };
+			return { dieColor: DiceColorObj.White, dieValue: 13 - densityEffective };
 		}
 	}
 

@@ -1,17 +1,13 @@
 <script lang="ts">
 	import { css } from 'styled-system/css';
-	import { DiceColor } from '$lib/dicer.svelte';
+	import { DiceColorObj, type DiceColorType } from '$lib/dicer.svelte';
 	import { getDieValue } from '$lib/dice-utils';
 
-	let { diceDensityMatrix, diceColor }: { diceDensityMatrix: number[][]; diceColor: DiceColor } = $props();
-
-	// $effect(() => {
-	// 	console.log({ diceDensityMatrix });
-	// });
+	let { diceDensityMatrix, diceColor }: { diceDensityMatrix: number[][]; diceColor: DiceColorType } = $props();
 </script>
 
 {#snippet die({ dieValue, dieColor, dotRadius = 16, singleDotRadius = 20 })}
-	{@const dotColor = dieColor === DiceColor.White ? 'black' : 'white'}
+	{@const dotColor = dieColor === DiceColorObj.White ? 'black' : 'white'}
 	<div
 		data-die-color={dieColor}
 		class={css({

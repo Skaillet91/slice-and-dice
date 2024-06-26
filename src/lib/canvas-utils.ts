@@ -1,4 +1,5 @@
-import type { DiceSidesCount } from './dicer.svelte';
+import { z } from 'zod';
+import type { DiceSidesCount, Die, DieColorObj } from './dicer.svelte';
 
 // https://codesandbox.io/p/sandbox/svelte-easy-crop-with-file-upload-and-live-preview-36xsr?file=%2FcanvasUtils.js
 export const createImage = (url: string): Promise<HTMLImageElement> => {
@@ -112,6 +113,92 @@ export const applyFilters = (
 	}
 
 	return newImgData;
+};
+
+export const drawCircle = (
+	ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+	x: number,
+	y: number,
+	radius: number,
+	fill?: string,
+	stroke?: string,
+	strokeWidth: number = 0
+): void => {
+	ctx.beginPath();
+	ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+
+	if (fill) {
+		ctx.fillStyle = fill;
+		ctx.fill();
+	}
+
+	if (stroke) {
+		ctx.lineWidth = strokeWidth;
+		ctx.strokeStyle = stroke;
+		ctx.stroke();
+	}
+};
+
+export const DiceMatrixSchema = z
+	.array(z.array(z.object({})))
+	.refine((value) => value.every((row) => row.length === value[0].length), {
+		message: 'Expected all rows to have the same length.',
+	});
+
+/* 
+
+	Diagram structure for both vertical and horizontal axis:
+
+  * outerPadding
+  * label
+	* die
+	* innerPadding
+	* die
+	* innerPadding
+	* die
+	* outerPadding
+
+*/
+
+export const generateMosaic = ({
+	diceMatrix,
+	dieImageDatas,
+	outerPadding = 50,
+	labelSize = 50,
+	dieSize = 100,
+	innerPadding = 1,
+}: {
+	diceMatrix: Die[][];
+	dieImageDatas: {
+		[DieColorObj.White]: { [key: number]: ImageData };
+		[DieColorObj.Black]: { [key: number]: ImageData };
+	};
+	outerPadding?: number;
+	labelSize?: number;
+	dieSize?: number;
+	innerPadding?: number;
+}): ImageData => {
+	// Ensure equal length of all rows
+	DiceMatrixSchema.parse(diceMatrix);
+
+	const diceCountHorizontal = diceMatrix[0].length;
+	const diceCountVertical = diceMatrix.length;
+	const canvasWidth = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountHorizontal - innerPadding;
+	const canvasHeight = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountVertical - innerPadding;
+
+	return withOffscreenCanvas({ width: canvasWidth, height: canvasHeight }, (ctx) => {
+		diceMatrix.forEach((row: Die[], y: number) => {
+			row.forEach((die: Die, x: number) => {
+				const left = outerPadding + labelSize + x * (dieSize + innerPadding);
+				const top = outerPadding + labelSize + y * (dieSize + innerPadding);
+				const imageData = dieImageDatas[die.dieColor][die.dieValue];
+
+				ctx.putImageData(imageData, left, top);
+			});
+		});
+
+		return ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+	});
 };
 
 const getCroppedImg = (

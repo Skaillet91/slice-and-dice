@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { readFileAsDataUrl } from '$lib/canvas-utils';
-	import DiceTable from '$lib/components/dice-table.svelte';
-	import DicerService, { DiceColor, type CropArea } from '$lib/dicer.svelte';
+	import DicerService, { DesignTwo, DiceColorObj, type CropArea } from '$lib/dicer.svelte';
 	import { getContext } from 'svelte';
 	import Cropper from 'svelte-easy-crop';
 	import assert from 'tiny-invariant';
@@ -14,23 +13,151 @@
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 
 	const dicer = getContext<DicerService>('service:dicer');
+
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
-	let canvas: HTMLCanvasElement | undefined; // popuplated from `bind:this`
+
+	let canvas_colorPreview: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieOneWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieOneBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieTwoWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieTwoBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieThreeWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieThreeBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieFourWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieFourBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieFiveWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieFiveBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieSixWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_dieSixBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
+	let canvas_mosaic: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 
 	$effect(() => {
 		const imgData = dicer.imgData_cropped_resized_filtered;
 
-		if (canvas) {
+		if (canvas_colorPreview) {
 			if (imgData) {
-				canvas.width = imgData.width;
-				canvas.height = imgData.height;
+				canvas_colorPreview.width = imgData.width;
+				canvas_colorPreview.height = imgData.height;
 
-				const ctx = canvas.getContext('2d');
+				const ctx = canvas_colorPreview.getContext('2d');
 				assert(ctx, 'Expected `ctx` to exist at this point.');
 				ctx.putImageData(imgData, 0, 0);
 			} else {
-				canvas.width = 100;
-				canvas.height = 0;
+				canvas_colorPreview.width = 100;
+				canvas_colorPreview.height = 0;
+			}
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieOneWhite) {
+			const ctx = canvas_dieOneWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieOneWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieOneBlack) {
+			const ctx = canvas_dieOneBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieOneBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieTwoWhite) {
+			const ctx = canvas_dieTwoWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieTwoWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieTwoBlack) {
+			const ctx = canvas_dieTwoBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieTwoBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieThreeWhite) {
+			const ctx = canvas_dieThreeWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieThreeWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieThreeBlack) {
+			const ctx = canvas_dieThreeBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieThreeBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieFourWhite) {
+			const ctx = canvas_dieFourWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieFourWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieFourBlack) {
+			const ctx = canvas_dieFourBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieFourBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieFiveWhite) {
+			const ctx = canvas_dieFiveWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieFiveWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieFiveBlack) {
+			const ctx = canvas_dieFiveBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieFiveBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieSixWhite) {
+			const ctx = canvas_dieSixWhite.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieSixWhite, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_dieSixBlack) {
+			const ctx = canvas_dieSixBlack.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+			ctx.putImageData(dicer.imgDataDieSixBlack, 0, 0);
+		}
+	});
+
+	$effect(() => {
+		if (canvas_mosaic) {
+			const ctx = canvas_mosaic.getContext('2d');
+			assert(ctx, 'Expected `ctx` to exist at this point.');
+
+			if (dicer.imgDataMosaic) {
+				canvas_mosaic.width = dicer.imgDataMosaic.width;
+				canvas_mosaic.height = dicer.imgDataMosaic.height;
+
+				ctx.putImageData(dicer.imgDataMosaic, 0, 0);
+			} else {
+				canvas_mosaic.width = 100;
+				canvas_mosaic.height = 0;
 			}
 		}
 	});
@@ -52,9 +179,9 @@
 
 <main
 	class="
-   block p-4
+   relative block items-start p-4
 
-   lg:flex lg:space-x-8
+   lg:flex lg:justify-between
  "
 >
 	<div
@@ -64,7 +191,7 @@
     lg:w-1/4
   "
 	>
-		<Accordion.Root multiple value={['image', 'mosaic', 'color', 'planning']}>
+		<Accordion.Root multiple value={['image', 'design']}>
 			<Accordion.Item value="image">
 				<Accordion.Trigger>Source Image</Accordion.Trigger>
 
@@ -72,13 +199,7 @@
 					<Field>
 						<Label for="file">Upload your file</Label>
 
-						<Input
-							type="file"
-							name="file"
-							accept={authorizedExtensions.join(',')}
-							required
-							onchange={persistUploadedImage}
-						/>
+						<Input type="file" name="file" accept={authorizedExtensions.join(',')} onchange={persistUploadedImage} />
 					</Field>
 
 					{#if dicer.imgString_original}
@@ -166,19 +287,19 @@
 
 							<RadioGroup.Root class="flex space-x-4" bind:value={dicer.diceColor}>
 								<span class="inline-flex items-center space-x-2">
-									<RadioGroup.Item value={DiceColor.White} id="DiceColorWhite" />
+									<RadioGroup.Item value={DiceColorObj.White} id="DiceColorWhite" />
 
 									<Label for="DiceColorWhite">White</Label>
 								</span>
 
 								<span class="inline-flex items-center space-x-2">
-									<RadioGroup.Item value={DiceColor.Black} id="DiceColorBlack" />
+									<RadioGroup.Item value={DiceColorObj.Black} id="DiceColorBlack" />
 
 									<Label for="DiceColorBlack">Black</Label>
 								</span>
 
 								<span class="flex items-center space-x-2">
-									<RadioGroup.Item value={DiceColor.Both} id="DiceColorBoth" />
+									<RadioGroup.Item value={DiceColorObj.Both} id="DiceColorBoth" />
 
 									<Label for="DiceColorBoth">Both</Label>
 								</span>
@@ -224,14 +345,14 @@
 						</Field>
 
 						<canvas
-							bind:this={canvas}
+							bind:this={canvas_colorPreview}
 							width={dicer.diceCountHorizontal}
 							height={dicer.diceCountVerticalEffective}
 							class="
-								w-full
+         w-full
 
-								[image-rendering:pixelated]
-							"
+         [image-rendering:pixelated]
+       "
 						></canvas>
 					</div>
 				</Accordion.Content>
@@ -317,10 +438,107 @@
 					</div>
 				</Accordion.Content>
 			</Accordion.Item>
+
+			<Accordion.Item value="design">
+				<Accordion.Trigger>Design</Accordion.Trigger>
+
+				<Accordion.Content>
+					<div class="space-y-4">
+						<p>This defines how the dice look in this app. It does not affect any calculations.</p>
+
+						{#if dicer.diceColor !== DiceColorObj.Black}
+							<div class="flex w-full justify-between">
+								<canvas id="die1white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieOneWhite}
+								></canvas>
+								<canvas id="die2white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieTwoWhite}
+								></canvas>
+								<canvas id="die3white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieThreeWhite}
+								></canvas>
+								<canvas id="die4white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFourWhite}
+								></canvas>
+								<canvas id="die5white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFiveWhite}
+								></canvas>
+								<canvas id="die6white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieSixWhite}
+								></canvas>
+							</div>
+						{/if}
+
+						{#if dicer.diceColor !== DiceColorObj.White}
+							<div class="flex w-full justify-between">
+								<canvas id="die1black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieOneBlack}
+								></canvas>
+								<canvas id="die2black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieTwoBlack}
+								></canvas>
+								<canvas id="die3black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieThreeBlack}
+								></canvas>
+								<canvas id="die4black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFourBlack}
+								></canvas>
+								<canvas id="die5black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFiveBlack}
+								></canvas>
+								<canvas id="die6black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieSixBlack}
+								></canvas>
+							</div>
+						{/if}
+
+						<div class="flex space-x-4">
+							<Field>
+								<Label for="design_dot_size">Dot radius</Label>
+								<Input id="design_dot_size" type="number" min="1" max="33" bind:value={dicer.design_dotSize} />
+							</Field>
+
+							<Field>
+								<Label for="design_dot_size_single">Dot radius of One</Label>
+								<Input
+									id="design_dot_size_single"
+									type="number"
+									min="1"
+									max="33"
+									bind:value={dicer.design_dotSizeSingle}
+								/>
+							</Field>
+						</div>
+
+						<div class="flex space-x-4">
+							<Field>
+								<Label for="design_padding">Padding</Label>
+								<Input id="design_padding" type="number" min="1" max="33" bind:value={dicer.design_padding} />
+							</Field>
+
+							<Field>
+								<Label for="design_padding_siz">Padding for Six</Label>
+								<Input id="design_padding_siz" type="number" min="1" max="33" bind:value={dicer.design_paddingForSix} />
+							</Field>
+						</div>
+
+						<Field>
+							<Label>Two</Label>
+
+							<RadioGroup.Root class="flex space-x-4" bind:value={dicer.design_two}>
+								<span class="inline-flex items-center space-x-2">
+									<RadioGroup.Item value={DesignTwo.Diagonal} id="design_two_diagonal" />
+
+									<Label for="design_two_diagonal">Diagonal</Label>
+								</span>
+
+								<span class="inline-flex items-center space-x-2">
+									<RadioGroup.Item value={DesignTwo.Vertical} id="design_two_vertical" />
+
+									<Label for="design_two_vertical">Vertical</Label>
+								</span>
+
+								<span class="inline-flex items-center space-x-2">
+									<RadioGroup.Item value={DesignTwo.Horizontal} id="design_two_horizontal" />
+
+									<Label for="design_two_horizontal">Horizontal</Label>
+								</span>
+							</RadioGroup.Root>
+						</Field>
+					</div>
+				</Accordion.Content>
+			</Accordion.Item>
 		</Accordion.Root>
 	</div>
 
-	{#if dicer.diceDensityMatrix}
-		<DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} />
-	{/if}
+	<!-- <DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} /> -->
+	<canvas id="canvas_mosaic" bind:this={canvas_mosaic} class="sticky top-4 w-8/12 object-contain"></canvas>
 </main>
