@@ -48,6 +48,9 @@ importers:
       '@types/eslint':
         specifier: ^8.56.7
         version: 8.56.10
+      '@types/lodash':
+        specifier: ^4.17.5
+        version: 4.17.5
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -66,9 +69,15 @@ importers:
       eslint-plugin-svelte:
         specifier: ^2.36.0
         version: 2.39.0(eslint@9.4.0)(svelte@5.0.0-next.157)
+      funcwork:
+        specifier: ^2.1.2
+        version: 2.1.2
       globals:
         specifier: ^15.0.0
         version: 15.3.0
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
       mode-watcher:
         specifier: ^0.3.1
         version: 0.3.1(svelte@5.0.0-next.157)
@@ -88,8 +97,8 @@ importers:
         specifier: ^3.6.0
         version: 3.8.0(postcss-load-config@4.0.2(postcss@8.4.38))(postcss@8.4.38)(svelte@5.0.0-next.157)
       svelte-easy-crop:
-        specifier: ^2.0.3
-        version: 2.0.3(svelte@5.0.0-next.157)
+        specifier: ^3.0.0
+        version: 3.0.0(svelte@5.0.0-next.157)
       svelte-eslint-parser:
         specifier: ^0.39.2
         version: 0.39.2(svelte@5.0.0-next.157)
@@ -607,6 +616,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/lodash@4.17.5':
+    resolution: {integrity: sha512-MBIOHVZqVqgfro1euRDWX7OO0fBVUUMrN6Pwm8LQsz8cWhEpihlvR70ENj3f40j58TNxZaWv2ndSkInykNBBJw==}
 
   '@types/node@17.0.45':
     resolution: {integrity: sha512-w+tIMs3rq2afQdsPJlODhoUEKzFP1ayaoyl1CcnwtIlsVe7K7bA1NGm4s3PraqTLlXnbIN84zuBlxBWo1u9BLw==}
@@ -1208,6 +1220,9 @@ packages:
   function-bind@1.1.2:
     resolution: {integrity: sha512-7XHNxH7qX9xG5mIwxkhumTox/MIRNcOgDrxWsMt2pAr23WHp6MrRlN7FBSFpCpr+oVO0F744iUgR82nJMfG2SA==}
 
+  funcwork@2.1.2:
+    resolution: {integrity: sha512-MWNfyrVoswRWKxlGL3bj5IynbISbvfgS1VbWlAeD3CAOikEiVQB7/6jzM1ZFcd8vG+WYdgLr4GYzZW+7HeayYg==}
+
   gauge@3.0.2:
     resolution: {integrity: sha512-+5J6MS/5XksCuXq++uFRsnUd7Ovu1XenbeuIuNRJxYWjgQbPuFhT14lAvsWfqfAmnwluf1OwMjz39HjfLPci0Q==}
     engines: {node: '>=10'}
@@ -1493,6 +1508,9 @@ packages:
 
   lodash.uniq@4.5.0:
     resolution: {integrity: sha512-xfBaXQd9ryd9dlSDvnvI0lvxfLJlYAZzXomUYzLKtUeOQvOP5piqAWuGtrhWeqaXK9hhoM/iyJc5AV+XfsX3HQ==}
+
+  lodash@4.17.21:
+    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
   look-it-up@2.1.0:
     resolution: {integrity: sha512-nMoGWW2HurtuJf6XAL56FWTDCWLOTSsanrgwOyaR5Y4e3zfG5N/0cU5xWZSEU3tBxhQugRbV1xL9jb+ug7yZww==}
@@ -2110,8 +2128,8 @@ packages:
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0
 
-  svelte-easy-crop@2.0.3:
-    resolution: {integrity: sha512-hB4CK4JOcnNdXPtaHyI2lFoFYxs2lGrjPvT1/A8Rp5m9aBC2RV0MHCJ0VjNrlSEWjTOEexcBIXCC5RW8QhF4zQ==}
+  svelte-easy-crop@3.0.0:
+    resolution: {integrity: sha512-up/PMxOLQIxuhE5binukqhO1kjhHeVtet3mtwGMHCLGD3Hl1atHiPfLAM09/rEGFxluUHClXANvPIIlYMe5hUQ==}
     peerDependencies:
       svelte: ^4.0.0
 
@@ -3002,6 +3020,8 @@ snapshots:
 
   '@types/json-schema@7.0.15': {}
 
+  '@types/lodash@4.17.5': {}
+
   '@types/node@17.0.45': {}
 
   '@types/pug@2.0.10': {}
@@ -3685,6 +3705,8 @@ snapshots:
 
   function-bind@1.1.2: {}
 
+  funcwork@2.1.2: {}
+
   gauge@3.0.2:
     dependencies:
       aproba: 2.0.0
@@ -3937,6 +3959,8 @@ snapshots:
   lodash.merge@4.6.2: {}
 
   lodash.uniq@4.5.0: {}
+
+  lodash@4.17.21: {}
 
   look-it-up@2.1.0: {}
 
@@ -4491,7 +4515,7 @@ snapshots:
       - stylus
       - sugarss
 
-  svelte-easy-crop@2.0.3(svelte@5.0.0-next.157):
+  svelte-easy-crop@3.0.0(svelte@5.0.0-next.157):
     dependencies:
       svelte: 5.0.0-next.157
 

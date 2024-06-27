@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { readFileAsDataUrl } from '$lib/canvas-utils';
-	import DicerService, { DesignTwo, DiceColorObj, type CropArea } from '$lib/dicer.svelte';
+	import { createImage, generateMosaicPure, readFileAsDataUrl } from '$lib/canvas-utils';
+	import DicerService, { DesignTwo, DiceColorObj, type CropArea, type Die } from '$lib/dicer.svelte';
 	import { getContext } from 'svelte';
 	import Cropper from 'svelte-easy-crop';
 	import assert from 'tiny-invariant';
+	import throttle from 'lodash/throttle';
 
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
@@ -11,6 +12,10 @@
 	import { Label } from '$lib/components/ui/label';
 	import Field from '$lib/components/ui/field.svelte';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import { FuncWork } from 'funcwork';
+
+	const fw = new FuncWork();
+	fw.add(generateMosaicPure);
 
 	const dicer = getContext<DicerService>('service:dicer');
 
@@ -147,14 +152,72 @@
 
 	$effect(() => {
 		if (canvas_mosaic) {
-			const ctx = canvas_mosaic.getContext('2d');
+			const _canvas_mosaic = canvas_mosaic;
+			const ctx = _canvas_mosaic.getContext('2d');
 			assert(ctx, 'Expected `ctx` to exist at this point.');
 
-			if (dicer.imgDataMosaic) {
-				canvas_mosaic.width = dicer.imgDataMosaic.width;
-				canvas_mosaic.height = dicer.imgDataMosaic.height;
+			// if (dicer.imgDataMosaic) {
+			// 	canvas_mosaic.width = dicer.imgDataMosaic.width;
+			// 	canvas_mosaic.height = dicer.imgDataMosaic.height;
 
-				ctx.putImageData(dicer.imgDataMosaic, 0, 0);
+			// 	ctx.putImageData(dicer.imgDataMosaic, 0, 0);
+			if (
+				dicer.diceMatrix &&
+				canvas_dieOneWhite &&
+				canvas_dieTwoWhite &&
+				canvas_dieThreeWhite &&
+				canvas_dieFourWhite &&
+				canvas_dieFiveWhite &&
+				canvas_dieSixWhite &&
+				canvas_dieOneBlack &&
+				canvas_dieTwoBlack &&
+				canvas_dieThreeBlack &&
+				canvas_dieFourBlack &&
+				canvas_dieFiveBlack &&
+				canvas_dieSixBlack
+			) {
+				const args: {
+					diceMatrix: Die[][];
+					diceImageStrings: {
+						White: { [key: number]: string };
+						Black: { [key: number]: string };
+					};
+					outerPadding?: number;
+					labelSize?: number;
+					dieSize?: number;
+					innerPadding?: number;
+				} = {
+					diceMatrix: dicer.diceMatrix,
+					diceImageStrings: {
+						White: {
+							1: canvas_dieOneWhite.toDataURL(),
+							2: canvas_dieTwoWhite.toDataURL(),
+							3: canvas_dieThreeWhite.toDataURL(),
+							4: canvas_dieFourWhite.toDataURL(),
+							5: canvas_dieFiveWhite.toDataURL(),
+							6: canvas_dieSixWhite.toDataURL(),
+						},
+						Black: {
+							1: canvas_dieOneBlack.toDataURL(),
+							2: canvas_dieTwoBlack.toDataURL(),
+							3: canvas_dieThreeBlack.toDataURL(),
+							4: canvas_dieFourBlack.toDataURL(),
+							5: canvas_dieFiveBlack.toDataURL(),
+							6: canvas_dieSixBlack.toDataURL(),
+						},
+					},
+				};
+
+				fw.invoke(generateMosaicPure, args).then(async (imageStr: string) => {
+					const imageElement = await createImage(imageStr);
+
+					requestAnimationFrame(() => {
+						_canvas_mosaic.width = imageElement.width;
+						_canvas_mosaic.height = imageElement.height;
+
+						ctx.drawImage(imageElement, 0, 0);
+					});
+				});
 			} else {
 				canvas_mosaic.width = 100;
 				canvas_mosaic.height = 0;

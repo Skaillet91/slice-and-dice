@@ -92,7 +92,7 @@ export default class DicerService {
 	imgElement_original: HTMLImageElement | null = $state(null);
 	imgString_original: string | null = $state(null); // ToDo: make readonly. Can only modify through importImage() method
 	cropArea: CropArea | null = $state(null);
-	lockAspectRatioOriginal: boolean = $state(true);
+	lockAspectRatioOriginal: boolean = $state(false);
 	diceCountHorizontal: number = $state(50);
 	diceCountVertical: number = $state(50);
 	diceColor: DiceColorType = $state(DiceColorObj.Both);
@@ -142,9 +142,15 @@ export default class DicerService {
 	});
 
 	diceCountVerticalEffective: number | null = $derived.by(() => {
-		return this.aspectRatioOriginal === null
-			? null //
-			: Math.round(this.diceCountHorizontal / this.aspectRatioOriginal);
+		if (!this.lockAspectRatioOriginal) {
+			return this.diceCountVertical ?? null;
+		}
+
+		if (this.aspectRatioOriginal === null) {
+			return null;
+		}
+
+		return Math.round(this.diceCountHorizontal / this.aspectRatioOriginal);
 	});
 
 	aspectRatioDice: number | undefined = $derived.by(() => {

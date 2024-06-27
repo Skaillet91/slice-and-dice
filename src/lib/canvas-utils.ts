@@ -201,6 +201,142 @@ export const generateMosaic = ({
 	});
 };
 
+/* 
+
+	Diagram structure for both vertical and horizontal axis:
+
+  * outerPadding
+  * label
+	* die
+	* innerPadding
+	* die
+	* innerPadding
+	* die
+	* outerPadding
+
+*/
+
+export const generateMosaicPure = async ({
+	diceMatrix,
+	diceImageStrings,
+	outerPadding = 50,
+	labelSize = 50,
+	dieSize = 100,
+	innerPadding = 1,
+}: {
+	diceMatrix: Die[][];
+	diceImageStrings: {
+		White: { [key: number]: string };
+		Black: { [key: number]: string };
+	};
+	outerPadding?: number;
+	labelSize?: number;
+	dieSize?: number;
+	innerPadding?: number;
+}): Promise<string> => {
+	const base64StringToImageData = async (base64: string): Promise<ImageData> => {
+		const response = await fetch(base64);
+		const blob = await response.blob();
+		const imageBitmap = await createImageBitmap(blob);
+		const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height);
+		const ctx = canvas.getContext('2d');
+
+		if (!ctx) {
+			throw new Error('Expected `ctx` to be available at this point.');
+		}
+
+		ctx.drawImage(imageBitmap, 0, 0);
+		return ctx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
+	};
+
+	// let data;
+
+	// try {
+	// 	data = JSON.parse(dataRaw);
+	// } catch (e) {
+	// 	throw new Error('Expected the data to be a valid JSON string.');
+	// }
+
+	// const {
+	// 	diceMatrix,
+	// 	diceImageStrings,
+	// 	outerPadding = 50,
+	// 	labelSize = 50,
+	// 	dieSize = 100,
+	// 	innerPadding = 1,
+	// }: {
+	// 	diceMatrix: Die[][];
+	// 	diceImageStrings: {
+	// 		White: { [key: number]: string };
+	// 		Black: { [key: number]: string };
+	// 	};
+	// 	outerPadding?: number;
+	// 	labelSize?: number;
+	// 	dieSize?: number;
+	// 	innerPadding?: number;
+	// } = data;
+
+	const diceImageDatas: {
+		White: { [key: number]: ImageData };
+		Black: { [key: number]: ImageData };
+	} = {
+		White: {
+			[1]: await base64StringToImageData(diceImageStrings.White[1]),
+			[2]: await base64StringToImageData(diceImageStrings.White[2]),
+			[3]: await base64StringToImageData(diceImageStrings.White[3]),
+			[4]: await base64StringToImageData(diceImageStrings.White[4]),
+			[5]: await base64StringToImageData(diceImageStrings.White[5]),
+			[6]: await base64StringToImageData(diceImageStrings.White[6]),
+		} as const,
+		Black: {
+			[1]: await base64StringToImageData(diceImageStrings.Black[1]),
+			[2]: await base64StringToImageData(diceImageStrings.Black[2]),
+			[3]: await base64StringToImageData(diceImageStrings.Black[3]),
+			[4]: await base64StringToImageData(diceImageStrings.Black[4]),
+			[5]: await base64StringToImageData(diceImageStrings.Black[5]),
+			[6]: await base64StringToImageData(diceImageStrings.Black[6]),
+		} as const,
+	} as const;
+
+	const diceCountHorizontal = diceMatrix[0].length;
+	const diceCountVertical = diceMatrix.length;
+	const canvasWidth = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountHorizontal - innerPadding;
+	const canvasHeight = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountVertical - innerPadding;
+	const canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
+	const ctx = canvas.getContext('2d');
+
+	if (!ctx) {
+		throw new Error('Expected `ctx` to be available at this point.');
+	}
+
+	diceMatrix.forEach((row: Die[], y: number) => {
+		row.forEach((die: Die, x: number) => {
+			const left = outerPadding + labelSize + x * (dieSize + innerPadding);
+			const top = outerPadding + labelSize + y * (dieSize + innerPadding);
+			const imageData = diceImageDatas[die.dieColor][die.dieValue];
+
+			ctx.putImageData(imageData, left, top);
+		});
+	});
+
+	const blob = await canvas.convertToBlob();
+
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+
+		reader.onload = () => {
+			if (typeof reader.result !== 'string') {
+				throw new Error('Expected `reader.result` to be a string at this point.');
+			}
+
+			resolve(reader.result);
+		};
+
+		reader.onerror = reject;
+		reader.readAsDataURL(blob);
+	});
+};
+
 const getCroppedImg = (
 	image: HTMLImageElement,
 	pixelCrop: { x: number; y: number; width: number; height: number }
