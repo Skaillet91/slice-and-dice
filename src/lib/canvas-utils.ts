@@ -222,7 +222,7 @@ export const generateMosaicPure = async ({
 	outerPadding = 50,
 	labelSize = 50,
 	dieSize = 100,
-	innerPadding = 1,
+	innerPadding = 0,
 }: {
 	diceMatrix: Die[][];
 	diceImageStrings: {
@@ -248,33 +248,6 @@ export const generateMosaicPure = async ({
 		ctx.drawImage(imageBitmap, 0, 0);
 		return ctx.getImageData(0, 0, imageBitmap.width, imageBitmap.height);
 	};
-
-	// let data;
-
-	// try {
-	// 	data = JSON.parse(dataRaw);
-	// } catch (e) {
-	// 	throw new Error('Expected the data to be a valid JSON string.');
-	// }
-
-	// const {
-	// 	diceMatrix,
-	// 	diceImageStrings,
-	// 	outerPadding = 50,
-	// 	labelSize = 50,
-	// 	dieSize = 100,
-	// 	innerPadding = 1,
-	// }: {
-	// 	diceMatrix: Die[][];
-	// 	diceImageStrings: {
-	// 		White: { [key: number]: string };
-	// 		Black: { [key: number]: string };
-	// 	};
-	// 	outerPadding?: number;
-	// 	labelSize?: number;
-	// 	dieSize?: number;
-	// 	innerPadding?: number;
-	// } = data;
 
 	const diceImageDatas: {
 		White: { [key: number]: ImageData };

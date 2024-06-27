@@ -4,7 +4,7 @@
 	import { getContext } from 'svelte';
 	import Cropper from 'svelte-easy-crop';
 	import assert from 'tiny-invariant';
-	import throttle from 'lodash/throttle';
+	import debounce from 'lodash/debounce';
 
 	import * as Accordion from '$lib/components/ui/accordion/index.js';
 	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
@@ -16,6 +16,40 @@
 
 	const fw = new FuncWork();
 	fw.add(generateMosaicPure);
+
+	const renderMosaic = (args: {
+		diceMatrix: Die[][];
+		diceImageStrings: {
+			White: { [key: number]: string };
+			Black: { [key: number]: string };
+		};
+		outerPadding?: number;
+		labelSize?: number;
+		dieSize?: number;
+		innerPadding?: number;
+	}) => {
+		console.log('starting web worker for width', args.diceMatrix[0].length);
+		fw.invoke(generateMosaicPure, args).then(async (imageStr: string) => {
+			const imageElement = await createImage(imageStr);
+
+			requestAnimationFrame(() => {
+				console.log('! finished web worker for width', args.diceMatrix[0].length);
+
+				assert(canvas_mosaic, 'Expected canvas_mosaic to exist at this point');
+
+				canvas_mosaic.width = imageElement.width;
+				canvas_mosaic.height = imageElement.height;
+
+				const ctx = canvas_mosaic.getContext('2d');
+
+				assert(ctx, 'Expected `ctx` to exist at this point.');
+
+				ctx.drawImage(imageElement, 0, 0);
+			});
+		});
+	};
+
+	const renderMosaicDebounced = debounce(renderMosaic, 100, { maxWait: 500 });
 
 	const dicer = getContext<DicerService>('service:dicer');
 
@@ -152,15 +186,6 @@
 
 	$effect(() => {
 		if (canvas_mosaic) {
-			const _canvas_mosaic = canvas_mosaic;
-			const ctx = _canvas_mosaic.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-
-			// if (dicer.imgDataMosaic) {
-			// 	canvas_mosaic.width = dicer.imgDataMosaic.width;
-			// 	canvas_mosaic.height = dicer.imgDataMosaic.height;
-
-			// 	ctx.putImageData(dicer.imgDataMosaic, 0, 0);
 			if (
 				dicer.diceMatrix &&
 				canvas_dieOneWhite &&
@@ -176,6 +201,22 @@
 				canvas_dieFiveBlack &&
 				canvas_dieSixBlack
 			) {
+				// Touch properties to trigger reactivity
+				dicer.design_bgColor_blackDie;
+				dicer.design_bgColor_whiteDie;
+				dicer.design_borderColor_blackDie;
+				dicer.design_borderColor_whiteDie;
+				dicer.design_borderWidth;
+				dicer.design_dotColor_BlackDie;
+				dicer.design_dotColor_WhiteDie;
+				dicer.design_dotColorSingle_blackDie;
+				dicer.design_dotColorSingle_whiteDie;
+				dicer.design_dotSize;
+				dicer.design_dotSizeSingle;
+				dicer.design_padding;
+				dicer.design_paddingForSix;
+				dicer.design_two;
+
 				const args: {
 					diceMatrix: Die[][];
 					diceImageStrings: {
@@ -208,16 +249,7 @@
 					},
 				};
 
-				fw.invoke(generateMosaicPure, args).then(async (imageStr: string) => {
-					const imageElement = await createImage(imageStr);
-
-					requestAnimationFrame(() => {
-						_canvas_mosaic.width = imageElement.width;
-						_canvas_mosaic.height = imageElement.height;
-
-						ctx.drawImage(imageElement, 0, 0);
-					});
-				});
+				renderMosaicDebounced(args);
 			} else {
 				canvas_mosaic.width = 100;
 				canvas_mosaic.height = 0;
