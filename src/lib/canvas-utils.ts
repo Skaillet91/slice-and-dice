@@ -282,6 +282,8 @@ export const generateMosaicPure = async ({
 		throw new Error('Expected `ctx` to be available at this point.');
 	}
 
+	console.log('* doing web worker for width', diceMatrix[0].length);
+
 	diceMatrix.forEach((row: Die[], y: number) => {
 		row.forEach((die: Die, x: number) => {
 			const left = outerPadding + labelSize + x * (dieSize + innerPadding);
@@ -301,6 +303,8 @@ export const generateMosaicPure = async ({
 			if (typeof reader.result !== 'string') {
 				throw new Error('Expected `reader.result` to be a string at this point.');
 			}
+
+			console.log('^ about to finish web worker for width', diceMatrix[0].length);
 
 			resolve(reader.result);
 		};

@@ -14,46 +14,10 @@
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import { FuncWork } from 'funcwork';
 
-	const fw = new FuncWork();
-	fw.add(generateMosaicPure);
-
-	const renderMosaic = (args: {
-		diceMatrix: Die[][];
-		diceImageStrings: {
-			White: { [key: number]: string };
-			Black: { [key: number]: string };
-		};
-		outerPadding?: number;
-		labelSize?: number;
-		dieSize?: number;
-		innerPadding?: number;
-	}) => {
-		console.log('starting web worker for width', args.diceMatrix[0].length);
-		fw.invoke(generateMosaicPure, args).then(async (imageStr: string) => {
-			const imageElement = await createImage(imageStr);
-
-			requestAnimationFrame(() => {
-				console.log('! finished web worker for width', args.diceMatrix[0].length);
-
-				assert(canvas_mosaic, 'Expected canvas_mosaic to exist at this point');
-
-				canvas_mosaic.width = imageElement.width;
-				canvas_mosaic.height = imageElement.height;
-
-				const ctx = canvas_mosaic.getContext('2d');
-
-				assert(ctx, 'Expected `ctx` to exist at this point.');
-
-				ctx.drawImage(imageElement, 0, 0);
-			});
-		});
-	};
-
-	const renderMosaicDebounced = debounce(renderMosaic, 100, { maxWait: 500 });
-
 	const dicer = getContext<DicerService>('service:dicer');
-
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+
+	let renderMosaicCounter = $state(0);
 
 	let canvas_colorPreview: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 	let canvas_dieOneWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
@@ -70,6 +34,49 @@
 	let canvas_dieSixBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 	let canvas_mosaic: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 
+	const renderMosaic = (args: {
+		diceMatrix: Die[][];
+		diceImageStrings: {
+			White: { [key: number]: string };
+			Black: { [key: number]: string };
+		};
+		outerPadding?: number;
+		labelSize?: number;
+		dieSize?: number;
+		innerPadding?: number;
+	}) => {
+		const renderMosaicIterationCurrent = ++renderMosaicCounter;
+		const fw = new FuncWork();
+
+		fw.add(generateMosaicPure);
+
+		fw.invoke(generateMosaicPure, args).then(async (imageStr: string) => {
+			const imageElement = await createImage(imageStr);
+
+			if (renderMosaicIterationCurrent !== renderMosaicCounter) {
+				return;
+			}
+
+			renderMosaicCounter = 0;
+
+			requestAnimationFrame(() => {
+				assert(canvas_mosaic, 'Expected canvas_mosaic to exist at this point');
+
+				canvas_mosaic.width = imageElement.width;
+				canvas_mosaic.height = imageElement.height;
+
+				const ctx = canvas_mosaic.getContext('2d');
+
+				assert(ctx, 'Expected `ctx` to exist at this point.');
+
+				ctx.drawImage(imageElement, 0, 0);
+			});
+		});
+	};
+
+	const renderMosaicDebounced = debounce(renderMosaic, 500);
+
+	// Color Correction Preview
 	$effect(() => {
 		const imgData = dicer.imgData_cropped_resized_filtered;
 
@@ -88,6 +95,7 @@
 		}
 	});
 
+	// Dice Design Preview
 	$effect(() => {
 		if (canvas_dieOneWhite) {
 			const ctx = canvas_dieOneWhite.getContext('2d');
@@ -95,7 +103,6 @@
 			ctx.putImageData(dicer.imgDataDieOneWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieOneBlack) {
 			const ctx = canvas_dieOneBlack.getContext('2d');
@@ -103,7 +110,6 @@
 			ctx.putImageData(dicer.imgDataDieOneBlack, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieTwoWhite) {
 			const ctx = canvas_dieTwoWhite.getContext('2d');
@@ -111,7 +117,6 @@
 			ctx.putImageData(dicer.imgDataDieTwoWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieTwoBlack) {
 			const ctx = canvas_dieTwoBlack.getContext('2d');
@@ -119,7 +124,6 @@
 			ctx.putImageData(dicer.imgDataDieTwoBlack, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieThreeWhite) {
 			const ctx = canvas_dieThreeWhite.getContext('2d');
@@ -127,7 +131,6 @@
 			ctx.putImageData(dicer.imgDataDieThreeWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieThreeBlack) {
 			const ctx = canvas_dieThreeBlack.getContext('2d');
@@ -135,7 +138,6 @@
 			ctx.putImageData(dicer.imgDataDieThreeBlack, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieFourWhite) {
 			const ctx = canvas_dieFourWhite.getContext('2d');
@@ -143,7 +145,6 @@
 			ctx.putImageData(dicer.imgDataDieFourWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieFourBlack) {
 			const ctx = canvas_dieFourBlack.getContext('2d');
@@ -159,7 +160,6 @@
 			ctx.putImageData(dicer.imgDataDieFiveWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieFiveBlack) {
 			const ctx = canvas_dieFiveBlack.getContext('2d');
@@ -167,7 +167,6 @@
 			ctx.putImageData(dicer.imgDataDieFiveBlack, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieSixWhite) {
 			const ctx = canvas_dieSixWhite.getContext('2d');
@@ -175,7 +174,6 @@
 			ctx.putImageData(dicer.imgDataDieSixWhite, 0, 0);
 		}
 	});
-
 	$effect(() => {
 		if (canvas_dieSixBlack) {
 			const ctx = canvas_dieSixBlack.getContext('2d');
@@ -184,6 +182,7 @@
 		}
 	});
 
+	// Dice Mosaic
 	$effect(() => {
 		if (canvas_mosaic) {
 			if (
@@ -202,6 +201,7 @@
 				canvas_dieSixBlack
 			) {
 				// Touch properties to trigger reactivity
+				/* eslint-disable @typescript-eslint/no-unused-expressions */
 				dicer.design_bgColor_blackDie;
 				dicer.design_bgColor_whiteDie;
 				dicer.design_borderColor_blackDie;
@@ -216,6 +216,7 @@
 				dicer.design_padding;
 				dicer.design_paddingForSix;
 				dicer.design_two;
+				/* eslint-enable @typescript-eslint/no-unused-expressions */
 
 				const args: {
 					diceMatrix: Die[][];
@@ -257,18 +258,14 @@
 		}
 	});
 
+	// HTML event handlers
 	const persistUploadedImage = async (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
 		const imgString = await readFileAsDataUrl(event.currentTarget?.files);
 		await dicer.importImageStr(imgString);
 	};
 
-	const persistCropArea = (
-		e: CustomEvent<{
-			/* percent: CropArea; */
-			pixels: CropArea;
-		}>
-	) => {
-		dicer.cropArea = e.detail.pixels;
+	const persistCropArea = (event: CustomEvent<{ pixels: CropArea }>) => {
+		dicer.cropArea = event.detail.pixels;
 	};
 </script>
 
