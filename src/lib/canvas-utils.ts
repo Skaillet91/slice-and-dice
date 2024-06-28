@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { DiceSidesCount, Die, DieColorObj } from './dicer.svelte';
+import type { DiceSidesCount, Die } from './dicer.svelte';
 
 // https://codesandbox.io/p/sandbox/svelte-easy-crop-with-file-upload-and-live-preview-36xsr?file=%2FcanvasUtils.js
 export const createImage = (url: string): Promise<HTMLImageElement> => {
