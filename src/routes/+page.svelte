@@ -15,11 +15,15 @@
 	import * as Table from '$lib/components/ui/table';
 	import { FuncWork } from 'funcwork';
 	import LoaderCircleIcon from 'lucide-svelte/icons/loader-circle';
+	import ImageDownIcon from 'lucide-svelte/icons/image-down';
+	import Button from '$lib/components/ui/button/button.svelte';
+	import { toast } from 'svelte-sonner';
 
 	const dicer = getContext<DicerService>('service:dicer');
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
 
 	let renderMosaicCounter = $state(0);
+	let imageURL = $state('');
 
 	let canvas_colorPreview: HTMLCanvasElement | undefined = $state(); //5 popuplated from `bind:this`
 	let canvas_dieOneWhite: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
@@ -192,6 +196,7 @@
 			) {
 				// Touch properties to trigger reactivity
 				/* eslint-disable @typescript-eslint/no-unused-expressions */
+				dicer.imgString_original;
 				dicer.design_bgColor_blackDie;
 				dicer.design_bgColor_whiteDie;
 				dicer.design_borderColor_blackDie;
@@ -251,12 +256,40 @@
 
 	// HTML event handlers
 	const persistUploadedImage = async (event: Event & { currentTarget: EventTarget & HTMLInputElement }) => {
-		const imgString = await readFileAsDataUrl(event.currentTarget?.files);
+		const file = event.currentTarget?.files?.[0];
+		assert(file, 'Expected `file` to exist at this point.');
+		const imgString = await readFileAsDataUrl(file);
 		await dicer.importImageStr(imgString);
 	};
 
 	const persistCropArea = (event: CustomEvent<{ pixels: CropArea }>) => {
 		dicer.cropArea = event.detail.pixels;
+	};
+
+	const downloadImageFromURL = async (event: SubmitEvent) => {
+		event.preventDefault();
+
+		try {
+			if (!URL.canParse(imageURL)) {
+				throw new Error('Invalid URL');
+			}
+
+			const proxyURL = 'https://corsproxy.io/?' + encodeURIComponent(imageURL);
+			const response = await fetch(proxyURL);
+
+			if (!response.ok) {
+				throw new Error(`${response.status}`);
+			}
+
+			const blob = await response.blob();
+			const file = new File([blob], 'image', { type: blob.type });
+			const imgString = await readFileAsDataUrl(file);
+			await dicer.importImageStr(imgString);
+		} catch (e) {
+			toast.error('Failed to download the image from the URL.', {
+				description: (e as Error)?.message,
+			});
+		}
 	};
 </script>
 
@@ -276,7 +309,21 @@
 					<Field>
 						<Label for="file">Upload your file</Label>
 
-						<Input type="file" name="file" accept={authorizedExtensions.join(',')} onchange={persistUploadedImage} />
+						<Input
+							type="file"
+							name="file"
+							accept={authorizedExtensions.join(',')}
+							onchange={persistUploadedImage}
+							class="cursor-pointer"
+						/>
+
+						<form onsubmit={downloadImageFromURL} class="flex gap-2">
+							<Input placeholder="Or upload an image from URL" class="grow" bind:value={imageURL} />
+
+							<Button variant="outline" size="icon" type="submit" class="shrink-0">
+								<ImageDownIcon class="h-[1.2rem] w-[1.2rem]" />
+							</Button>
+						</form>
 					</Field>
 
 					{#if dicer.imgString_original}
@@ -307,10 +354,16 @@
 								id="diceCountHorizontal"
 								type="number"
 								min="1"
+								max={Math.min(dicer.imgData_cropped?.width ?? 9999)}
 								bind:value={dicer.diceCountHorizontal}
 							/>
 
-							<Input type="range" min="1" max="200" bind:value={dicer.diceCountHorizontal} />
+							<Input
+								type="range"
+								min="1"
+								max={Math.min(dicer.imgData_cropped?.width ?? 200, 200)}
+								bind:value={dicer.diceCountHorizontal}
+							/>
 						</div>
 					</Field>
 
@@ -323,6 +376,7 @@
 								id="diceCountVertical"
 								type="number"
 								min="1"
+								max={Math.min(dicer.imgData_cropped?.height ?? 9999)}
 								value={dicer.diceCountVerticalEffective}
 								disabled={dicer.lockAspectRatioOriginal}
 								oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
@@ -331,7 +385,7 @@
 							<Input
 								type="range"
 								min="1"
-								max="200"
+								max={Math.min(dicer.imgData_cropped?.height ?? 200, 200)}
 								value={dicer.diceCountVerticalEffective}
 								disabled={dicer.lockAspectRatioOriginal}
 								oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}

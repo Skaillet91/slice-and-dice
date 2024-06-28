@@ -7,6 +7,7 @@
 	import DarkModeSwitcher from '$lib/components/dark-mode-switcher.svelte';
 	import DicesIcon from 'lucide-svelte/icons/dices';
 	import ExternalLinkIcon from 'lucide-svelte/icons/external-link';
+	import { Toaster } from '$lib/components/ui/sonner';
 
 	const dicerService = new DicerService();
 	dicerService.importFromLocalStorageMaybe();
@@ -15,24 +16,33 @@
 </script>
 
 <ModeWatcher />
+<Toaster />
 
 <header
 	class="
-  flex flex-wrap gap-y-1 gap-x-4 border-b bg-background p-4
+   flex flex-wrap gap-x-4 gap-y-1 border-b bg-background p-4 items-baseline
 
-  md:flex-nowrap md:items-center md:px-6
-"
+   md:flex-nowrap md:px-6
+ "
 >
-	<DicesIcon class="inline align-middle" />
+	<DicesIcon class="inline self-center" />
 
-	<h1 class="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight grow md:grow-0">Slice and Dice</h1>
+	<h1
+		class="
+   flex-1 shrink-0 grow whitespace-nowrap text-xl font-semibold tracking-tight
+
+   md:grow-0
+ "
+	>
+		Slice and Dice
+	</h1>
 
 	<summary
 		class="
-   order-last block w-full text-muted-foreground grow
+    order-last block w-full grow text-muted-foreground
 
-   md:order-none md:w-auto
- "
+    md:order-none md:w-auto
+  "
 	>
 		Convert an image to a dice mosaic, then craft it in real life
 	</summary>

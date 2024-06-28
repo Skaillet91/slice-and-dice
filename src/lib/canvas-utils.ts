@@ -12,15 +12,8 @@ export const createImage = (url: string): Promise<HTMLImageElement> => {
 	});
 };
 
-export const readFileAsDataUrl = (files: FileList | null): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		const file = files?.[0];
-
-		if (!file) {
-			reject(new Error('Expected a file'));
-			return;
-		}
-
+export const readFileAsDataUrl = (file: File): Promise<string> => {
+	return new Promise((resolve) => {
 		const reader = new FileReader();
 
 		reader.onload = (eventOfReader) => {
@@ -159,7 +152,8 @@ export const DiceMatrixSchema = z
 	* outerPadding
 
 */
-
+// This function is passed into a web worker via string serialization.
+// THus, it cannot have any external references or dependencies. Types are OR.
 export const generateMosaicPure = async ({
 	diceMatrix,
 	diceImageStrings,
