@@ -44,7 +44,7 @@
 			Black: { [key: number]: string };
 		};
 		outerPadding?: number;
-		labelSize?: number;
+		labelHeight?: number;
 		dieSize?: number;
 		innerPadding?: number;
 	}) => {
@@ -215,7 +215,7 @@
 						Black: { [key: number]: string };
 					};
 					outerPadding?: number;
-					labelSize?: number;
+					labelHeight?: number;
 					dieSize?: number;
 					innerPadding?: number;
 				} = {

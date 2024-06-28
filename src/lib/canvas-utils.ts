@@ -150,63 +150,7 @@ export const DiceMatrixSchema = z
 	Diagram structure for both vertical and horizontal axis:
 
   * outerPadding
-  * label
-	* die
-	* innerPadding
-	* die
-	* innerPadding
-	* die
-	* outerPadding
-
-*/
-
-export const generateMosaic = ({
-	diceMatrix,
-	dieImageDatas,
-	outerPadding = 50,
-	labelSize = 50,
-	dieSize = 100,
-	innerPadding = 1,
-}: {
-	diceMatrix: Die[][];
-	dieImageDatas: {
-		[DieColorObj.White]: { [key: number]: ImageData };
-		[DieColorObj.Black]: { [key: number]: ImageData };
-	};
-	outerPadding?: number;
-	labelSize?: number;
-	dieSize?: number;
-	innerPadding?: number;
-}): ImageData => {
-	// Ensure equal length of all rows
-	DiceMatrixSchema.parse(diceMatrix);
-
-	const diceCountHorizontal = diceMatrix[0].length;
-	const diceCountVertical = diceMatrix.length;
-	const canvasWidth = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountHorizontal - innerPadding;
-	const canvasHeight = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountVertical - innerPadding;
-
-	return withOffscreenCanvas({ width: canvasWidth, height: canvasHeight }, (ctx) => {
-		diceMatrix.forEach((row: Die[], y: number) => {
-			row.forEach((die: Die, x: number) => {
-				const left = outerPadding + labelSize + x * (dieSize + innerPadding);
-				const top = outerPadding + labelSize + y * (dieSize + innerPadding);
-				const imageData = dieImageDatas[die.dieColor][die.dieValue];
-
-				ctx.putImageData(imageData, left, top);
-			});
-		});
-
-		return ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-	});
-};
-
-/* 
-
-	Diagram structure for both vertical and horizontal axis:
-
-  * outerPadding
-  * label
+  * labelWidth / labelHeight
 	* die
 	* innerPadding
 	* die
@@ -220,7 +164,8 @@ export const generateMosaicPure = async ({
 	diceMatrix,
 	diceImageStrings,
 	outerPadding = 50,
-	labelSize = 50,
+	labelWidth = 100,
+	labelHeight = 50,
 	dieSize = 100,
 	innerPadding = 0,
 }: {
@@ -230,7 +175,8 @@ export const generateMosaicPure = async ({
 		Black: { [key: number]: string };
 	};
 	outerPadding?: number;
-	labelSize?: number;
+	labelWidth?: number;
+	labelHeight?: number;
 	dieSize?: number;
 	innerPadding?: number;
 }): Promise<string> => {
@@ -273,8 +219,8 @@ export const generateMosaicPure = async ({
 
 	const diceCountHorizontal = diceMatrix[0].length;
 	const diceCountVertical = diceMatrix.length;
-	const canvasWidth = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountHorizontal - innerPadding;
-	const canvasHeight = outerPadding * 2 + labelSize + (dieSize + innerPadding) * diceCountVertical - innerPadding;
+	const canvasWidth = outerPadding * 2 + labelWidth + (dieSize + innerPadding) * diceCountHorizontal - innerPadding;
+	const canvasHeight = outerPadding * 2 + labelHeight + (dieSize + innerPadding) * diceCountVertical - innerPadding;
 	const canvas = new OffscreenCanvas(canvasWidth, canvasHeight);
 	const ctx = canvas.getContext('2d');
 
@@ -284,10 +230,38 @@ export const generateMosaicPure = async ({
 
 	console.log('* doing web worker for width', diceMatrix[0].length);
 
+	// Background
+	ctx.fillStyle = 'white';
+	ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+	// Draw horizontal axis labels
+	ctx.textAlign = 'center';
+	ctx.fillStyle = 'black';
+	ctx.font = '48px sans-serif';
+	diceMatrix[0].forEach((_die, x: number) => {
+		const left = outerPadding + labelWidth + x * (dieSize + innerPadding) + dieSize / 2;
+		const top = outerPadding + labelHeight / 2;
+
+		ctx.fillText(`${x + 1}`, left, top);
+	});
+
+	// Draw vertical axis labels
+	ctx.textAlign = 'center';
+	ctx.fillStyle = 'black';
+	ctx.textBaseline = 'middle';
+	ctx.font = '48px sans-serif';
+	diceMatrix.forEach((_die, y: number) => {
+		const top = outerPadding + labelHeight + y * (dieSize + innerPadding) + dieSize / 2;
+		const left = outerPadding + labelWidth / 2;
+
+		ctx.fillText(`${y + 1}`, left, top);
+	});
+
+	// Draw dice
 	diceMatrix.forEach((row: Die[], y: number) => {
 		row.forEach((die: Die, x: number) => {
-			const left = outerPadding + labelSize + x * (dieSize + innerPadding);
-			const top = outerPadding + labelSize + y * (dieSize + innerPadding);
+			const left = outerPadding + labelWidth + x * (dieSize + innerPadding);
+			const top = outerPadding + labelHeight + y * (dieSize + innerPadding);
 			const imageData = diceImageDatas[die.dieColor][die.dieValue];
 
 			ctx.putImageData(imageData, left, top);
