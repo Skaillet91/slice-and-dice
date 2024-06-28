@@ -34,6 +34,7 @@
 	let canvas_dieSixBlack: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 	let canvas_mosaic: HTMLCanvasElement | undefined = $state(); // popuplated from `bind:this`
 
+	// Delegate rendering to a web worker
 	const renderMosaic = (args: {
 		diceMatrix: Die[][];
 		diceImageStrings: {
@@ -97,92 +98,79 @@
 
 	// Dice Design Preview
 	$effect(() => {
-		if (canvas_dieOneWhite) {
-			const ctx = canvas_dieOneWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieOneWhite, 0, 0);
-		}
+		if (!canvas_dieOneWhite) return;
+		const ctx = canvas_dieOneWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieOneWhite, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieOneBlack) {
-			const ctx = canvas_dieOneBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieOneBlack, 0, 0);
-		}
+		if (!canvas_dieOneBlack) return;
+		const ctx = canvas_dieOneBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieOneBlack, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieTwoWhite) {
-			const ctx = canvas_dieTwoWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieTwoWhite, 0, 0);
-		}
+		if (!canvas_dieTwoWhite) return;
+		const ctx = canvas_dieTwoWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieTwoWhite, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieTwoBlack) {
-			const ctx = canvas_dieTwoBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieTwoBlack, 0, 0);
-		}
+		if (!canvas_dieTwoBlack) return;
+		const ctx = canvas_dieTwoBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieTwoBlack, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieThreeWhite) {
-			const ctx = canvas_dieThreeWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieThreeWhite, 0, 0);
-		}
+		if (!canvas_dieThreeWhite) return;
+		const ctx = canvas_dieThreeWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieThreeWhite, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieThreeBlack) {
-			const ctx = canvas_dieThreeBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieThreeBlack, 0, 0);
-		}
+		if (!canvas_dieThreeBlack) return;
+		const ctx = canvas_dieThreeBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieThreeBlack, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieFourWhite) {
-			const ctx = canvas_dieFourWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieFourWhite, 0, 0);
-		}
+		if (!canvas_dieFourWhite) return;
+		const ctx = canvas_dieFourWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieFourWhite, 0, 0);
 	});
 	$effect(() => {
-		if (canvas_dieFourBlack) {
-			const ctx = canvas_dieFourBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieFourBlack, 0, 0);
-		}
+		if (!canvas_dieFourBlack) return;
+		const ctx = canvas_dieFourBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieFourBlack, 0, 0);
+	});
+	$effect(() => {
+		if (!canvas_dieFiveWhite) return;
+		const ctx = canvas_dieFiveWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieFiveWhite, 0, 0);
+	});
+	$effect(() => {
+		if (!canvas_dieFiveBlack) return;
+		const ctx = canvas_dieFiveBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieFiveBlack, 0, 0);
+	});
+	$effect(() => {
+		if (!canvas_dieSixWhite) return;
+		const ctx = canvas_dieSixWhite.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieSixWhite, 0, 0);
+	});
+	$effect(() => {
+		if (!canvas_dieSixBlack) return;
+		const ctx = canvas_dieSixBlack.getContext('2d');
+		assert(ctx, 'Expected `ctx` to exist at this point.');
+		ctx.putImageData(dicer.imgDataDieSixBlack, 0, 0);
 	});
 
-	$effect(() => {
-		if (canvas_dieFiveWhite) {
-			const ctx = canvas_dieFiveWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieFiveWhite, 0, 0);
-		}
-	});
-	$effect(() => {
-		if (canvas_dieFiveBlack) {
-			const ctx = canvas_dieFiveBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieFiveBlack, 0, 0);
-		}
-	});
-	$effect(() => {
-		if (canvas_dieSixWhite) {
-			const ctx = canvas_dieSixWhite.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieSixWhite, 0, 0);
-		}
-	});
-	$effect(() => {
-		if (canvas_dieSixBlack) {
-			const ctx = canvas_dieSixBlack.getContext('2d');
-			assert(ctx, 'Expected `ctx` to exist at this point.');
-			ctx.putImageData(dicer.imgDataDieSixBlack, 0, 0);
-		}
-	});
-
-	// Dice Mosaic
+	// Synchronously collect state for a dice mosaic, then render it asynchronously
 	$effect(() => {
 		if (canvas_mosaic) {
 			if (
@@ -250,6 +238,7 @@
 					},
 				};
 
+				// Async
 				renderMosaicDebounced(args);
 			} else {
 				canvas_mosaic.width = 100;
