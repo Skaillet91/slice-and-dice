@@ -271,7 +271,7 @@
 		class="
     w-full
 
-    lg:w-1/4
+    lg:w-[28%]
   "
 	>
 		<Accordion.Root multiple value={['image']}>
@@ -350,7 +350,7 @@
 							<Table.Root>
 								<Table.Body>
 									<Table.Row>
-										<Table.Head class="pl-0 h-auto w-1/2">Aspect ratio:</Table.Head>
+										<Table.Head class="h-auto w-1/2 pl-0">Aspect ratio:</Table.Head>
 										<Table.Cell class="p-0 text-left">
 											{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}
 										</Table.Cell>
@@ -471,19 +471,19 @@
 						<Table.Root>
 							<Table.Body>
 								<Table.Row>
-									<Table.Head class="pl-0 h-auto">Mosaic width:</Table.Head>
+									<Table.Head class="h-auto pl-0">Mosaic width:</Table.Head>
 									<Table.Cell class="p-0">{dicer.totalWidth} mm</Table.Cell>
 								</Table.Row>
 								<Table.Row>
-									<Table.Head class="pl-0 h-auto">Mosaic height:</Table.Head>
+									<Table.Head class="h-auto pl-0">Mosaic height:</Table.Head>
 									<Table.Cell class="p-0">{dicer.totalHeight} mm</Table.Cell>
 								</Table.Row>
 								<Table.Row>
-									<Table.Head class="pl-0 h-auto">White dice count:</Table.Head>
+									<Table.Head class="h-auto pl-0">White dice count:</Table.Head>
 									<Table.Cell class="p-0">{dicer.diceCountWhite}</Table.Cell>
 								</Table.Row>
 								<Table.Row>
-									<Table.Head class="pl-0 h-auto">Black dice count:</Table.Head>
+									<Table.Head class="h-auto pl-0">Black dice count:</Table.Head>
 									<Table.Cell class="p-0">{dicer.diceCountBlack}</Table.Cell>
 								</Table.Row>
 							</Table.Body>
@@ -583,7 +583,13 @@
 		</Accordion.Root>
 	</div>
 
-	<div class="sticky top-4 w-8/12">
+	<div
+		class="
+    relative space-y-4
+
+    lg:sticky lg:top-4 lg:w-[70%]
+  "
+	>
 		<div class="flex w-full justify-between gap-1">
 			<div>
 				<canvas id="die1white" width="100" height="100" class="w-full" bind:this={canvas_dieOneWhite}></canvas>
@@ -629,12 +635,12 @@
 		{#if renderMosaicCounter}
 			<div
 				class="
-      absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center
+      absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform pt-[4cqi] text-center
       font-extrabold leading-tight tracking-tight
 
       [-webkit-text-stroke:0.3cqi_black]
 
-      [font-size:5cqi]
+      [font-size:6cqi]
     "
 			>
 				slicing
