@@ -19,7 +19,7 @@
 	{transitionConfig}
 	{...$$restProps}
 >
-	<div class="pb-4 pt-0">
+	<div class="p-4 bg-muted">
 		<slot />
 	</div>
 </AccordionPrimitive.Content>

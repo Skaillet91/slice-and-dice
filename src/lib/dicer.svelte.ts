@@ -1,10 +1,4 @@
-import getCroppedImg, {
-	applyFilters,
-	createImage,
-	drawCircle,
-	generateMosaic,
-	withOffscreenCanvas,
-} from './canvas-utils';
+import getCroppedImg, { applyFilters, createImage, drawCircle, withOffscreenCanvas } from './canvas-utils';
 import z from 'zod';
 import { generateDiceDensityMatrix, getDieValue } from './dice-utils';
 import assert from 'tiny-invariant';
@@ -389,34 +383,6 @@ export default class DicerService {
 
 	imgDataDieSixBlack: ImageData = $derived.by(() => {
 		return this.drawDieSix(DiceColorObj.Black);
-	});
-
-	imgDataMosaic: ImageData | null = $derived.by(() => {
-		if (!this.diceMatrix) {
-			return null;
-		}
-
-		return generateMosaic({
-			diceMatrix: this.diceMatrix,
-			dieImageDatas: {
-				[DieColorObj.White]: {
-					1: this.imgDataDieOneWhite,
-					2: this.imgDataDieTwoWhite,
-					3: this.imgDataDieThreeWhite,
-					4: this.imgDataDieFourWhite,
-					5: this.imgDataDieFiveWhite,
-					6: this.imgDataDieSixWhite,
-				},
-				[DieColorObj.Black]: {
-					1: this.imgDataDieOneBlack,
-					2: this.imgDataDieTwoBlack,
-					3: this.imgDataDieThreeBlack,
-					4: this.imgDataDieFourBlack,
-					5: this.imgDataDieFiveBlack,
-					6: this.imgDataDieSixBlack,
-				},
-			},
-		});
 	});
 
 	//

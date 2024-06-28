@@ -12,7 +12,9 @@
 	import { Label } from '$lib/components/ui/label';
 	import Field from '$lib/components/ui/field.svelte';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import * as Table from '$lib/components/ui/table';
 	import { FuncWork } from 'funcwork';
+	import LoaderCircle from 'lucide-svelte/icons/loader-circle';
 
 	const dicer = getContext<DicerService>('service:dicer');
 	const authorizedExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -272,27 +274,29 @@
     lg:w-1/4
   "
 	>
-		<Accordion.Root multiple value={['image', 'design']}>
+		<Accordion.Root multiple value={['image']}>
 			<Accordion.Item value="image">
 				<Accordion.Trigger>Source Image</Accordion.Trigger>
 
 				<Accordion.Content>
-					<Field>
-						<Label for="file">Upload your file</Label>
+					<div class="space-y-4">
+						<Field>
+							<Label for="file">Upload your file</Label>
 
-						<Input type="file" name="file" accept={authorizedExtensions.join(',')} onchange={persistUploadedImage} />
-					</Field>
+							<Input type="file" name="file" accept={authorizedExtensions.join(',')} onchange={persistUploadedImage} />
+						</Field>
 
-					{#if dicer.imgString_original}
-						<div style="position: relative; width: 100%; height: 300px;">
-							<Cropper
-								image={dicer.imgString_original}
-								crop={{ x: 0, y: 0 }}
-								aspect={dicer.aspectRatioDice}
-								on:cropcomplete={persistCropArea}
-							/>
-						</div>
-					{/if}
+						{#if dicer.imgString_original}
+							<div style="position: relative; width: 100%; height: 300px;">
+								<Cropper
+									image={dicer.imgString_original}
+									crop={{ x: 0, y: 0 }}
+									aspect={dicer.aspectRatioDice}
+									on:cropcomplete={persistCropArea}
+								/>
+							</div>
+						{/if}
+					</div>
 				</Accordion.Content>
 			</Accordion.Item>
 
@@ -343,12 +347,16 @@
 						</Field>
 
 						<Field>
-							<Label>Aspect Ratio</Label>
-
-							<p>
-								{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}
-								({dicer.diceCountTotal} dice)
-							</p>
+							<Table.Root>
+								<Table.Body>
+									<Table.Row>
+										<Table.Head class="pl-0 h-auto w-1/2">Aspect ratio:</Table.Head>
+										<Table.Cell class="p-0 text-left">
+											{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}
+										</Table.Cell>
+									</Table.Row>
+								</Table.Body>
+							</Table.Root>
 
 							<p class="flex items-center space-x-2">
 								<Checkbox
@@ -444,6 +452,8 @@
 
 				<Accordion.Content>
 					<div class="space-y-4">
+						<p class="text-muted-foreground">For your informartion. These numbers do not affect the mosaic.</p>
+
 						<div class="flex space-x-4">
 							<Field>
 								<Label for="dieSize">Die size</Label>
@@ -458,41 +468,26 @@
 							</Field>
 						</div>
 
-						<div class="flex space-x-4">
-							<Field>
-								<Label>Mosaic width</Label>
-
-								<p>
-									{dicer.totalWidth} mm
-								</p>
-							</Field>
-
-							<Field>
-								<Label>Mosaic height</Label>
-
-								<p>
-									{dicer.totalHeight} mm
-								</p>
-							</Field>
-						</div>
-
-						<div class="flex space-x-4">
-							<Field>
-								<Label>White dice</Label>
-
-								<p>
-									{dicer.diceCountWhite}
-								</p>
-							</Field>
-
-							<Field>
-								<Label>Black dice</Label>
-
-								<p>
-									{dicer.diceCountBlack}
-								</p>
-							</Field>
-						</div>
+						<Table.Root>
+							<Table.Body>
+								<Table.Row>
+									<Table.Head class="pl-0 h-auto">Mosaic width:</Table.Head>
+									<Table.Cell class="p-0">{dicer.totalWidth} mm</Table.Cell>
+								</Table.Row>
+								<Table.Row>
+									<Table.Head class="pl-0 h-auto">Mosaic height:</Table.Head>
+									<Table.Cell class="p-0">{dicer.totalHeight} mm</Table.Cell>
+								</Table.Row>
+								<Table.Row>
+									<Table.Head class="pl-0 h-auto">White dice count:</Table.Head>
+									<Table.Cell class="p-0">{dicer.diceCountWhite}</Table.Cell>
+								</Table.Row>
+								<Table.Row>
+									<Table.Head class="pl-0 h-auto">Black dice count:</Table.Head>
+									<Table.Cell class="p-0">{dicer.diceCountBlack}</Table.Cell>
+								</Table.Row>
+							</Table.Body>
+						</Table.Root>
 
 						<Field>
 							<Label for="dieSize">Dice Price</Label>
@@ -510,7 +505,7 @@
 							<Field>
 								<Label>Total Mosaic Price</Label>
 
-								<p>
+								<p class="text-muted-foreground">
 									{dicer.totalPriceRoundedUpToBatch} ₽ for {dicer.diceCountWhiteRoundedUpToBatch} white and {dicer.diceCountBlackRoundedUpToBatch}
 									black dice
 								</p>
@@ -525,41 +520,9 @@
 
 				<Accordion.Content>
 					<div class="space-y-4">
-						<p>This defines how the dice look in this app. It does not affect any calculations.</p>
-
-						{#if dicer.diceColor !== DiceColorObj.Black}
-							<div class="flex w-full justify-between">
-								<canvas id="die1white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieOneWhite}
-								></canvas>
-								<canvas id="die2white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieTwoWhite}
-								></canvas>
-								<canvas id="die3white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieThreeWhite}
-								></canvas>
-								<canvas id="die4white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFourWhite}
-								></canvas>
-								<canvas id="die5white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFiveWhite}
-								></canvas>
-								<canvas id="die6white" width="100" height="100" class="[width:14%]" bind:this={canvas_dieSixWhite}
-								></canvas>
-							</div>
-						{/if}
-
-						{#if dicer.diceColor !== DiceColorObj.White}
-							<div class="flex w-full justify-between">
-								<canvas id="die1black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieOneBlack}
-								></canvas>
-								<canvas id="die2black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieTwoBlack}
-								></canvas>
-								<canvas id="die3black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieThreeBlack}
-								></canvas>
-								<canvas id="die4black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFourBlack}
-								></canvas>
-								<canvas id="die5black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieFiveBlack}
-								></canvas>
-								<canvas id="die6black" width="100" height="100" class="[width:14%]" bind:this={canvas_dieSixBlack}
-								></canvas>
-							</div>
-						{/if}
+						<p class="text-muted-foreground">
+							This defines how the dice look in this app. It does not affect any calculations.
+						</p>
 
 						<div class="flex space-x-4">
 							<Field>
@@ -594,20 +557,20 @@
 						<Field>
 							<Label>Two</Label>
 
-							<RadioGroup.Root class="flex space-x-4" bind:value={dicer.design_two}>
-								<span class="inline-flex items-center space-x-2">
+							<RadioGroup.Root class="flex space-x-2" bind:value={dicer.design_two}>
+								<span class="inline-flex items-center space-x-1">
 									<RadioGroup.Item value={DesignTwo.Diagonal} id="design_two_diagonal" />
 
 									<Label for="design_two_diagonal">Diagonal</Label>
 								</span>
 
-								<span class="inline-flex items-center space-x-2">
+								<span class="inline-flex items-center space-x-1">
 									<RadioGroup.Item value={DesignTwo.Vertical} id="design_two_vertical" />
 
 									<Label for="design_two_vertical">Vertical</Label>
 								</span>
 
-								<span class="inline-flex items-center space-x-2">
+								<span class="inline-flex items-center space-x-1">
 									<RadioGroup.Item value={DesignTwo.Horizontal} id="design_two_horizontal" />
 
 									<Label for="design_two_horizontal">Horizontal</Label>
@@ -620,6 +583,68 @@
 		</Accordion.Root>
 	</div>
 
-	<!-- <DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} /> -->
-	<canvas id="canvas_mosaic" bind:this={canvas_mosaic} class="sticky top-4 w-8/12 object-contain"></canvas>
+	<div class="sticky top-4 w-8/12">
+		<div class="flex w-full justify-between gap-1">
+			<div>
+				<canvas id="die1white" width="100" height="100" class="w-full" bind:this={canvas_dieOneWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die2white" width="100" height="100" class="w-full" bind:this={canvas_dieTwoWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die3white" width="100" height="100" class="w-full" bind:this={canvas_dieThreeWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die4white" width="100" height="100" class="w-full" bind:this={canvas_dieFourWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die5white" width="100" height="100" class="w-full" bind:this={canvas_dieFiveWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die6white" width="100" height="100" class="w-full" bind:this={canvas_dieSixWhite}></canvas>
+			</div>
+			<div>
+				<canvas id="die1black" width="100" height="100" class="w-full" bind:this={canvas_dieOneBlack}></canvas>
+			</div>
+			<div>
+				<canvas id="die2black" width="100" height="100" class="w-full" bind:this={canvas_dieTwoBlack}></canvas>
+			</div>
+			<div>
+				<canvas id="die3black" width="100" height="100" class="w-full" bind:this={canvas_dieThreeBlack}></canvas>
+			</div>
+			<div>
+				<canvas id="die4black" width="100" height="100" class="w-full" bind:this={canvas_dieFourBlack}></canvas>
+			</div>
+			<div>
+				<canvas id="die5black" width="100" height="100" class="w-full" bind:this={canvas_dieFiveBlack}></canvas>
+			</div>
+			<div>
+				<canvas id="die6black" width="100" height="100" class="w-full" bind:this={canvas_dieSixBlack}></canvas>
+			</div>
+		</div>
+
+		<!-- <DiceTable diceDensityMatrix={dicer.diceDensityMatrix} diceColor={dicer.diceColor} /> -->
+		<canvas id="canvas_mosaic" bind:this={canvas_mosaic} class="h-auto w-full object-contain"></canvas>
+
+		{#if renderMosaicCounter}
+			<div
+				class="
+      absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform text-center
+      font-extrabold leading-tight tracking-tight
+
+      [-webkit-text-stroke:0.3cqi_black]
+
+      [font-size:5cqi]
+    "
+			>
+				slicing
+				<br />
+				and
+				<br />
+				dicing
+				<br />
+				<LoaderCircle class="inline animate-spin rounded-full bg-black" size="1em" />
+			</div>
+		{/if}
+	</div>
 </main>
