@@ -8,11 +8,68 @@
 	import DicesIcon from 'lucide-svelte/icons/dices';
 	import ExternalLinkIcon from 'lucide-svelte/icons/external-link';
 	import { Toaster } from '$lib/components/ui/sonner';
+	import assert from 'tiny-invariant';
+	import { readFileAsDataUrl } from '$lib/canvas-utils';
 
 	const dicerService = new DicerService();
 	dicerService.importFromLocalStorageMaybe();
 	dicerService.setUpEffectToWriteToLocalStorage();
 	setContext('service:dicer', dicerService);
+
+	// https://web.dev/patterns/clipboard/paste-images#progressive_enhancement
+	const readFiles = async (items: ClipboardItem[] | FileList) => {
+		let image: File | undefined;
+
+		loop1: for (const item of items) {
+			if (item instanceof File && item.type?.startsWith('image/')) {
+				// For files from `e.clipboardData.files`.
+				image = item;
+				break;
+			} else if (item instanceof ClipboardItem) {
+				// For files from `navigator.clipboard.read()`.
+				const imageTypes = item.types?.filter((type) => type.startsWith('image/'));
+				for (const imageType of imageTypes) {
+					const blob = await item.getType(imageType);
+					const file = new File([blob], 'image', { type: blob.type });
+					image = file;
+					break loop1;
+				}
+			} else {
+				assert(false, 'This code should be unreachable.');
+			}
+		}
+
+		if (image) {
+			const imgString = await readFileAsDataUrl(image);
+			await dicerService.importImageStr(imgString);
+		}
+	};
+
+	// Paste from clipboard
+	document.addEventListener('paste', async (event) => {
+		const clipboardItems =
+			typeof navigator?.clipboard?.read === 'function' ? await navigator.clipboard.read() : event.clipboardData?.files;
+
+		if (!clipboardItems) return;
+
+		await readFiles(clipboardItems);
+	});
+
+	// Drag and drop
+	document.addEventListener(
+		'drop',
+		async (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+
+			let files = event.dataTransfer?.files;
+
+			if (!files) return;
+
+			await readFiles(files);
+		},
+		false
+	);
 </script>
 
 <ModeWatcher />

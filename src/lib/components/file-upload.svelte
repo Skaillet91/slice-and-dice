@@ -73,4 +73,10 @@
 			<ImageDownIcon class="h-[1.2rem] w-[1.2rem]" />
 		</Button>
 	</form>
+
+	<p class="text-muted-foreground">
+		Or paste an image from clipboard.
+		<br />
+		Or drag and drop an image onto this page.
+	</p>
 </Field>
