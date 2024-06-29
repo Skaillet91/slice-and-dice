@@ -30,14 +30,14 @@
 				id="diceCountHorizontal"
 				type="number"
 				min="1"
-				max={Math.min(dicer.imgData_cropped?.width ?? 9999)}
+				max={Math.min(dicer.imgElement_original?.width ?? 100)}
 				bind:value={dicer.diceCountHorizontal}
 			/>
 
 			<Input
 				type="range"
 				min="1"
-				max={Math.min(dicer.imgData_cropped?.width ?? 200, 200)}
+				max={Math.min(dicer.imgElement_original?.width ?? 100, 100)}
 				bind:value={dicer.diceCountHorizontal}
 			/>
 
@@ -70,7 +70,7 @@
 				id="diceCountVertical"
 				type="number"
 				min="1"
-				max={Math.min(dicer.imgData_cropped?.height ?? 9999)}
+				max={Math.min(dicer.imgElement_original?.height ?? 100)}
 				value={dicer.diceCountVerticalEffective}
 				disabled={dicer.lockAspectRatioOriginal}
 				oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
@@ -79,7 +79,7 @@
 			<Input
 				type="range"
 				min="1"
-				max={Math.min(dicer.imgData_cropped?.height ?? 200, 200)}
+				max={Math.min(dicer.imgElement_original?.height ?? 100, 100)}
 				value={dicer.diceCountVerticalEffective}
 				disabled={dicer.lockAspectRatioOriginal}
 				oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
