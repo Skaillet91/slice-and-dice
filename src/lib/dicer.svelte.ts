@@ -75,33 +75,60 @@ export const DicerExportSchema = z.object({
 
 type DicerExport = z.infer<typeof DicerExportSchema>;
 
+const defaults: DicerExport = {
+	imgString_original:
+		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAFzUkdCAK7OHOkAAAAEZ0FNQQAAsY8L/GEFAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAHHRFWHRTb2Z0d2FyZQBBZG9iZSBGaXJld29ya3MgQ1M1cbXjNgAAAiNJREFUWEfFlytXw0AQhRMUuEoiKyNBIosr/4BKcOCwSCwOXCuLxFFHJRJkZWUqceBK7ibTTCazj4QWvnPSzWMedx+TTeN1TvSPqALiOC7PKrroDInTEACn6VVaXhWMHhembSOCkmuxeJyaAHLK7samBfPs3rRtRMjkg+TGtCC5vTQtxWkIQPLDft9cr5ZL00oRIcjkPCZEWAWsp6/lVYEUwZkvsvIsT5Qm5VmFTE7Eo9ONgD3z60FLHgL5USc0GgK4Mc67Jifgj4PiSjExnwJA6wD4kvumQIIp4fMPGgIARPDy4YtPlhVEyOQ2e1mCQB0BzQn3CSmC47OXIoIWIQ8WQhv7mgDZ+12A+FygdwSkIJ/AtvabNaD1/vzkwbSmdI7qb8H5bGbaaT6no9JvMByatsZHal5ET2/X5Y0CWgvOEVj1ZtF3uox6edxekprj4qwoTSRDcoCWkuM52eKAcMSxYRWAgCaAApKQkMlL8brl9zgkRB2dHOsUuAR8ZtV0wEZe23ieVAK9U+AKhGd0aNc2tFFQBdiGaxd4yxAcHBcfEW0J8QsS8PU+bi0C9vDz4RTQtecSVxyngCwvMTjjwHkbQn1ruyGVoqsEfwOVId8R1RHAa5bX9jawxasJgCqoA9sUgTi0d3i/B7YtwpUcqF9EnK5rgoQjOXWI4CkbixD/C7ADAgRJxAYTUg2aD3Vgf9Gv/S9oCNBgJlYbToi9KuDviaIfi8KAne9xAEUAAAAASUVORK5CYII=',
+	cropArea: null,
+	lockAspectRatioOriginal: false,
+	diceCountHorizontal: 32,
+	diceCountVertical: 32,
+	diceColor: DiceColorObj.Both,
+	brightness: 100,
+	contrast: 104,
+	gamma: 100,
+	dieSize: 8,
+	glueSize: 0.1,
+	dicePricePerBatch: 1500,
+	diceBatchSize: 1000,
+
+	design_dotSize: 12,
+	design_dotSizeSingle: 17,
+	design_padding: 6,
+	design_paddingForSix: 15,
+	design_two: DesignTwo.Vertical,
+};
+
 export default class DicerService {
+	//
+	/**************/
+	/* Properties */
+	/**************/
+
+	defaults: DicerExport = { ...defaults };
+
 	//
 	/*********************/
 	/* User input params */
 	/*********************/
 
-	// These to must be manually kept in sync.
-	// Unfortunately, some manipulations require an HTMLImageElement while others need image string.
-	imgElement_original: HTMLImageElement | null = $state(null);
-	imgString_original: string | null = $state(null); // ToDo: make readonly. Can only modify through importImage() method
-	cropArea: CropArea | null = $state(null);
-	lockAspectRatioOriginal: boolean = $state(false);
-	diceCountHorizontal: number = $state(50);
-	diceCountVertical: number = $state(50);
-	diceColor: DiceColorType = $state(DiceColorObj.Both);
-	brightness: number = $state(100);
-	contrast: number = $state(100);
-	gamma: number = $state(100);
-	dieSize: number = $state(8);
-	glueSize: number = $state(0.1);
-	dicePricePerBatch: number = $state(1500);
-	diceBatchSize: number = $state(1000);
-	design_dotSize: number = $state(12);
-	design_dotSizeSingle: number = $state(17);
-	design_padding: number = $state(6);
-	design_paddingForSix: number = $state(15);
-	design_two: DesignTwo = $state(DesignTwo.Vertical);
+	imgString_original: string | null = $state(this.defaults.imgString_original); // ToDo: make readonly. Can only modify through importImage() method
+	cropArea: CropArea | null = $state(this.defaults.cropArea);
+	lockAspectRatioOriginal: boolean = $state(this.defaults.lockAspectRatioOriginal);
+	diceCountHorizontal: number = $state(this.defaults.diceCountHorizontal);
+	diceCountVertical: number = $state(this.defaults.diceCountVertical);
+	diceColor: DiceColorType = $state(this.defaults.diceColor);
+	brightness: number = $state(this.defaults.brightness);
+	contrast: number = $state(this.defaults.contrast);
+	gamma: number = $state(this.defaults.gamma);
+	dieSize: number = $state(this.defaults.dieSize);
+	glueSize: number = $state(this.defaults.glueSize);
+	dicePricePerBatch: number = $state(this.defaults.dicePricePerBatch);
+	diceBatchSize: number = $state(this.defaults.diceBatchSize);
+	design_dotSize: number = $state(this.defaults.design_dotSize);
+	design_dotSizeSingle: number = $state(this.defaults.design_dotSizeSingle);
+	design_padding: number = $state(this.defaults.design_padding);
+	design_paddingForSix: number = $state(this.defaults.design_paddingForSix);
+	design_two: DesignTwo = $state(this.defaults.design_two);
 
 	design_borderWidth = 1;
 	design_dotColor_WhiteDie = 'black';
@@ -114,6 +141,14 @@ export default class DicerService {
 	design_borderColor_blackDie = 'white';
 
 	//
+	/*****************/
+	/* Derived state */
+	/*****************/
+	// Unfortunately, some manipulations require an HTMLImageElement while others need image string.
+	// Must be manually synced from imgElement_string
+	imgElement_original: HTMLImageElement | null = $state(null);
+
+	//
 	/***************/
 	/* Constructor */
 	/***************/
@@ -121,6 +156,8 @@ export default class DicerService {
 	constructor(data?: DicerExport) {
 		if (data) {
 			this.import(data);
+		} else if (this.imgString_original) {
+			this.importImageStr();
 		}
 	}
 
@@ -424,7 +461,14 @@ export default class DicerService {
 		await this.importImageStr(data.imgString_original);
 	}
 
-	async importImageStr(imageStr: string | null): Promise<void> {
+	reset() {
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const { imgString_original, ...params } = this.defaults;
+
+		Object.assign(this, params);
+	}
+
+	async importImageStr(imageStr: string | null = this.defaults.imgString_original): Promise<void> {
 		this.imgString_original = imageStr;
 
 		if (imageStr != null) {

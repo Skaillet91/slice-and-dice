@@ -5,6 +5,8 @@
 	import Label from './ui/label/label.svelte';
 	import Input from './ui/input/input.svelte';
 	import assert from 'tiny-invariant';
+	import Button from './ui/button/button.svelte';
+	import { UndoIcon } from 'lucide-svelte';
 
 	// Services
 	const dicer = getContext<DicerService>('service:dicer');
@@ -42,6 +44,24 @@
 			<Input class="w-20" type="number" id="Brightness" min="0" bind:value={dicer.brightness} />
 
 			<Input type="range" min="0" max="200" bind:value={dicer.brightness} />
+
+			<Button
+				variant="outline"
+				size="icon"
+				disabled={dicer.brightness === dicer.defaults.brightness}
+				onclick={() => {
+					dicer.brightness = dicer.defaults.brightness;
+				}}
+				class="shrink-0"
+			>
+				<UndoIcon
+					class="
+       absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+       dark:rotate-0 dark:scale-100
+     "
+				/>
+			</Button>
 		</div>
 	</Field>
 
@@ -52,6 +72,24 @@
 			<Input class="w-20" type="number" id="Contrast" min="0" bind:value={dicer.contrast} />
 
 			<Input type="range" min="0" max="200" bind:value={dicer.contrast} />
+
+			<Button
+				variant="outline"
+				size="icon"
+				disabled={dicer.contrast === dicer.defaults.contrast}
+				onclick={() => {
+					dicer.contrast = dicer.defaults.contrast;
+				}}
+				class="shrink-0"
+			>
+				<UndoIcon
+					class="
+       absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+       dark:rotate-0 dark:scale-100
+     "
+				/>
+			</Button>
 		</div>
 	</Field>
 
@@ -62,6 +100,24 @@
 			<Input class="w-20" type="number" id="Gamma" min="0" bind:value={dicer.gamma} />
 
 			<Input type="range" min="0" max="200" bind:value={dicer.gamma} />
+
+			<Button
+				variant="outline"
+				size="icon"
+				disabled={dicer.gamma === dicer.defaults.gamma}
+				onclick={() => {
+					dicer.gamma = dicer.defaults.gamma;
+				}}
+				class="shrink-0"
+			>
+				<UndoIcon
+					class="
+       absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+       dark:rotate-0 dark:scale-100
+     "
+				/>
+			</Button>
 		</div>
 	</Field>
 

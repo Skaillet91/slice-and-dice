@@ -7,6 +7,7 @@
 	import PlanningControls from '$lib/components/planning-controls.svelte';
 	import DesignControls from '$lib/components/design-controls.svelte';
 	import DiceMosaic from '$lib/components/dice-mosaic.svelte';
+	import ResetControls from '$lib/components/reset-controls.svelte';
 </script>
 
 <div
@@ -57,6 +58,14 @@
 
 			<Accordion.Content>
 				<DesignControls />
+			</Accordion.Content>
+		</Accordion.Item>
+
+		<Accordion.Item value="reset">
+			<Accordion.Trigger>Reset</Accordion.Trigger>
+
+			<Accordion.Content>
+				<ResetControls />
 			</Accordion.Content>
 		</Accordion.Item>
 	</Accordion.Root>

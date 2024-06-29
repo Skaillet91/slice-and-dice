@@ -8,6 +8,8 @@
 	import Checkbox from '$lib/components/ui/checkbox/checkbox.svelte';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
 	import * as Table from '$lib/components/ui/table';
+	import Button from './ui/button/button.svelte';
+	import UndoIcon from 'lucide-svelte/icons/undo';
 
 	// Services
 	const dicer = getContext<DicerService>('service:dicer');
@@ -38,6 +40,24 @@
 				max={Math.min(dicer.imgData_cropped?.width ?? 200, 200)}
 				bind:value={dicer.diceCountHorizontal}
 			/>
+
+			<Button
+				variant="outline"
+				size="icon"
+				disabled={dicer.diceCountHorizontal === dicer.defaults.diceCountHorizontal}
+				onclick={() => {
+					dicer.diceCountHorizontal = dicer.defaults.diceCountHorizontal;
+				}}
+				class="shrink-0"
+			>
+				<UndoIcon
+					class="
+       absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+       dark:rotate-0 dark:scale-100
+     "
+				/>
+			</Button>
 		</div>
 	</Field>
 
@@ -64,6 +84,24 @@
 				disabled={dicer.lockAspectRatioOriginal}
 				oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
 			/>
+
+			<Button
+				variant="outline"
+				size="icon"
+				disabled={dicer.lockAspectRatioOriginal || dicer.diceCountVertical === dicer.defaults.diceCountVertical}
+				onclick={() => {
+					dicer.diceCountVertical = dicer.defaults.diceCountVertical;
+				}}
+				class="shrink-0"
+			>
+				<UndoIcon
+					class="
+       absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+       dark:rotate-0 dark:scale-100
+     "
+				/>
+			</Button>
 		</div>
 	</Field>
 

@@ -6,6 +6,8 @@
 	import Input from './ui/input/input.svelte';
 	import { DesignTwo } from '$lib/dicer.svelte';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
+	import Button from './ui/button/button.svelte';
+	import { UndoIcon } from 'lucide-svelte';
 
 	// Services
 	const dicer = getContext<DicerService>('service:dicer');
@@ -17,27 +19,109 @@
 <div class="space-y-4" {...restProps}>
 	<p class="text-muted-foreground">This defines how the dice look in this app. It does not affect any calculations.</p>
 
-	<div class="flex space-x-4">
-		<Field>
+	<div class="flex flex-wrap justify-between gap-4">
+		<Field class="w-[47%]">
 			<Label for="design_dot_size">Dot radius</Label>
-			<Input id="design_dot_size" type="number" min="1" max="33" bind:value={dicer.design_dotSize} />
+
+			<div class="flex gap-2">
+				<Input id="design_dot_size" type="number" min="1" max="33" bind:value={dicer.design_dotSize} />
+
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={dicer.design_dotSize === dicer.defaults.design_dotSize}
+					onclick={() => {
+						dicer.design_dotSize = dicer.defaults.design_dotSize;
+					}}
+					class="shrink-0"
+				>
+					<UndoIcon
+						class="
+        absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+        dark:rotate-0 dark:scale-100
+      "
+					/>
+				</Button>
+			</div>
 		</Field>
 
-		<Field>
+		<Field class="w-[47%]">
 			<Label for="design_dot_size_single">Dot radius of One</Label>
-			<Input id="design_dot_size_single" type="number" min="1" max="33" bind:value={dicer.design_dotSizeSingle} />
-		</Field>
-	</div>
 
-	<div class="flex space-x-4">
-		<Field>
+			<div class="flex gap-2">
+				<Input id="design_dot_size_single" type="number" min="1" max="33" bind:value={dicer.design_dotSizeSingle} />
+
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={dicer.design_dotSizeSingle === dicer.defaults.design_dotSizeSingle}
+					onclick={() => {
+						dicer.design_dotSizeSingle = dicer.defaults.design_dotSizeSingle;
+					}}
+					class="shrink-0"
+				>
+					<UndoIcon
+						class="
+        absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+        dark:rotate-0 dark:scale-100
+      "
+					/>
+				</Button>
+			</div>
+		</Field>
+
+		<Field class="w-[47%]">
 			<Label for="design_padding">Padding</Label>
-			<Input id="design_padding" type="number" min="1" max="33" bind:value={dicer.design_padding} />
+
+			<div class="flex gap-2">
+				<Input id="design_padding" type="number" min="1" max="33" bind:value={dicer.design_padding} />
+
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={dicer.design_padding === dicer.defaults.design_padding}
+					onclick={() => {
+						dicer.design_padding = dicer.defaults.design_padding;
+					}}
+					class="shrink-0"
+				>
+					<UndoIcon
+						class="
+        absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+        dark:rotate-0 dark:scale-100
+      "
+					/>
+				</Button>
+			</div>
 		</Field>
 
-		<Field>
+		<Field class="w-[47%]">
 			<Label for="design_padding_siz">Padding for Six</Label>
-			<Input id="design_padding_siz" type="number" min="1" max="33" bind:value={dicer.design_paddingForSix} />
+
+			<div class="flex gap-2">
+				<Input id="design_padding_siz" type="number" min="1" max="33" bind:value={dicer.design_paddingForSix} />
+
+				<Button
+					variant="outline"
+					size="icon"
+					disabled={dicer.design_paddingForSix === dicer.defaults.design_paddingForSix}
+					onclick={() => {
+						dicer.design_paddingForSix = dicer.defaults.design_paddingForSix;
+					}}
+					class="shrink-0"
+				>
+					<UndoIcon
+						class="
+        absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all
+
+        dark:rotate-0 dark:scale-100
+      "
+					/>
+				</Button>
+			</div>
 		</Field>
 	</div>
 
