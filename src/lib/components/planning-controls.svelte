@@ -50,6 +50,10 @@
 				<Table.Head class="h-auto pl-0">Black dice count:</Table.Head>
 				<Table.Cell class="p-0">{dicer.diceCountBlack}</Table.Cell>
 			</Table.Row>
+			<Table.Row>
+				<Table.Head class="h-auto pl-0">Total dice count:</Table.Head>
+				<Table.Cell class="p-0">{dicer.diceCountTotal}</Table.Cell>
+			</Table.Row>
 		</Table.Body>
 	</Table.Root>
 
