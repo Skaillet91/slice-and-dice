@@ -21,7 +21,7 @@
 	// HTML event handlers
 </script>
 
-<div class="space-y-4" {...restProps}>
+<div class="space-y-6" {...restProps}>
 	<Field>
 		<Label for="diceCountHorizontal">Dice count horizontal</Label>
 

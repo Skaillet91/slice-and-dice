@@ -22,7 +22,7 @@
 			<Accordion.Trigger>Source Image</Accordion.Trigger>
 
 			<Accordion.Content>
-				<div class="space-y-4">
+				<div class="space-y-6">
 					<FileUpload />
 					<CropperMy />
 				</div>

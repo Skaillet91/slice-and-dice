@@ -15,8 +15,8 @@
 	// HTML event handlers
 </script>
 
-<div class="space-y-4" {...restProps}>
-	<p class="text-muted-foreground">For your informartion. These numbers do not affect the mosaic.</p>
+<div class="space-y-6" {...restProps}>
+	<p class="text-muted-foreground">For your informartion. These numbers do not affect the mosaic render.</p>
 
 	<div class="flex space-x-4">
 		<Field>
@@ -35,23 +35,23 @@
 	<Table.Root>
 		<Table.Body>
 			<Table.Row>
-				<Table.Head class="h-auto pl-0">Mosaic width:</Table.Head>
+				<Table.Head class="h-auto pl-0">Mosaic width</Table.Head>
 				<Table.Cell class="p-0">{dicer.totalWidth} mm</Table.Cell>
 			</Table.Row>
 			<Table.Row>
-				<Table.Head class="h-auto pl-0">Mosaic height:</Table.Head>
+				<Table.Head class="h-auto pl-0">Mosaic height</Table.Head>
 				<Table.Cell class="p-0">{dicer.totalHeight} mm</Table.Cell>
 			</Table.Row>
 			<Table.Row>
-				<Table.Head class="h-auto pl-0">White dice count:</Table.Head>
+				<Table.Head class="h-auto pl-0">White dice count</Table.Head>
 				<Table.Cell class="p-0">{dicer.diceCountWhite}</Table.Cell>
 			</Table.Row>
 			<Table.Row>
-				<Table.Head class="h-auto pl-0">Black dice count:</Table.Head>
+				<Table.Head class="h-auto pl-0">Black dice count</Table.Head>
 				<Table.Cell class="p-0">{dicer.diceCountBlack}</Table.Cell>
 			</Table.Row>
 			<Table.Row>
-				<Table.Head class="h-auto pl-0">Total dice count:</Table.Head>
+				<Table.Head class="h-auto pl-0">Total dice count</Table.Head>
 				<Table.Cell class="p-0">{dicer.diceCountTotal}</Table.Cell>
 			</Table.Row>
 		</Table.Body>

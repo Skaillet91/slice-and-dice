@@ -16,7 +16,7 @@
 	let { ...restProps } = $props();
 </script>
 
-<div class="space-y-4" {...restProps}>
+<div class="space-y-6" {...restProps}>
 	<p class="text-muted-foreground">This defines how the dice look in this app. It does not affect any calculations.</p>
 
 	<div class="flex flex-wrap justify-between gap-4">

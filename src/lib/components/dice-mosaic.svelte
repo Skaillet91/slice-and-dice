@@ -226,7 +226,7 @@
 	const renderMosaicDebounced = debounce(renderMosaic, 500);
 </script>
 
-<div class="space-y-4" {...restProps}>
+<div class="space-y-6" {...restProps}>
 	<div class="flex w-full justify-between gap-1">
 		<div>
 			<canvas id="die1white" width="100" height="100" class="w-full" bind:this={canvas_dieOneWhite}></canvas>

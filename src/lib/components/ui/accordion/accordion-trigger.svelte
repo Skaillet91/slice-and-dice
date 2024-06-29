@@ -15,7 +15,8 @@
 	<AccordionPrimitive.Trigger
 		class={cn(
 			`
-     flex flex-1 items-center justify-between py-4 font-medium transition-all
+     flex flex-1 items-center justify-between border-b border-black bg-muted px-4 py-4 font-medium
+     transition-all
 
      [&[data-state=open]>svg]:rotate-180
 
