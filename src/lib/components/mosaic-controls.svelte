@@ -10,6 +10,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import Button from './ui/button/button.svelte';
 	import UndoIcon from 'lucide-svelte/icons/undo';
+	import Slider from './ui/slider/slider.svelte';
 
 	// Services
 	const dicer = getContext<DicerService>('service:dicer');
@@ -34,11 +35,11 @@
 				bind:value={dicer.diceCountHorizontal}
 			/>
 
-			<Input
-				type="range"
-				min="1"
+			<Slider
+				min={1}
 				max={Math.min(dicer.imgElement_original?.width ?? 100, 100)}
-				bind:value={dicer.diceCountHorizontal}
+				value={[dicer.diceCountHorizontal]}
+				onValueChange={([newValue]) => (dicer.diceCountHorizontal = newValue)}
 			/>
 
 			<Button
@@ -76,13 +77,12 @@
 				oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
 			/>
 
-			<Input
-				type="range"
-				min="1"
+			<Slider
+				min={1}
 				max={Math.min(dicer.imgElement_original?.height ?? 100, 100)}
-				value={dicer.diceCountVerticalEffective}
+				value={[dicer.diceCountVerticalEffective]}
 				disabled={dicer.lockAspectRatioOriginal}
-				oninput={(e) => dicer.diceCountVertical = parseInt((e.target as HTMLInputElement).value, 10)}
+				onValueChange={([newValue]) => (dicer.diceCountVertical = newValue)}
 			/>
 
 			<Button
@@ -111,7 +111,7 @@
 				<Table.Row>
 					<Table.Head class="h-auto w-1/2 pl-0">Aspect ratio:</Table.Head>
 					<Table.Cell class="p-0 text-left">
-						{dicer.aspectRatioDice === undefined ? null : Math.round(dicer.aspectRatioDice * 100) / 100}
+						{Math.round(dicer.aspectRatioDice * 100) / 100}
 					</Table.Cell>
 				</Table.Row>
 			</Table.Body>

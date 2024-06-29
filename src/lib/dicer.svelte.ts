@@ -172,28 +172,20 @@ export default class DicerService {
 			: null;
 	});
 
-	diceCountVerticalEffective: number | null = $derived.by(() => {
-		if (!this.lockAspectRatioOriginal) {
-			return this.diceCountVertical ?? null;
-		}
-
-		if (this.aspectRatioOriginal === null) {
-			return null;
+	diceCountVerticalEffective: number = $derived.by(() => {
+		if (!this.lockAspectRatioOriginal || this.aspectRatioOriginal === null) {
+			return this.diceCountVertical;
 		}
 
 		return Math.round(this.diceCountHorizontal / this.aspectRatioOriginal);
 	});
 
-	aspectRatioDice: number | undefined = $derived.by(() => {
-		return this.diceCountVerticalEffective === null
-			? undefined //
-			: this.diceCountHorizontal / this.diceCountVerticalEffective;
+	aspectRatioDice: number = $derived.by(() => {
+		return this.diceCountHorizontal / this.diceCountVerticalEffective;
 	});
 
-	diceCountTotal: number | null = $derived.by(() => {
-		return this.diceCountVerticalEffective === null
-			? null //
-			: this.diceCountHorizontal * this.diceCountVerticalEffective;
+	diceCountTotal: number = $derived.by(() => {
+		return this.diceCountHorizontal * this.diceCountVerticalEffective;
 	});
 
 	availableDiceSidesCount: DiceSidesCount = $derived.by(() => {
@@ -209,7 +201,7 @@ export default class DicerService {
 	});
 
 	imgData_cropped_resized: ImageData | null = $derived.by(() => {
-		if (!this.imgData_cropped || !this.diceCountVerticalEffective) {
+		if (!this.imgData_cropped) {
 			return null;
 		}
 
@@ -245,11 +237,7 @@ export default class DicerService {
 		return Math.round(width * 10) / 10;
 	});
 
-	totalHeight: number | null = $derived.by(() => {
-		if (!this.diceCountVerticalEffective) {
-			return null;
-		}
-
+	totalHeight: number = $derived.by(() => {
 		const height = this.diceCountVerticalEffective * (this.dieSize + this.glueSize) - this.glueSize;
 
 		return Math.round(height * 10) / 10;

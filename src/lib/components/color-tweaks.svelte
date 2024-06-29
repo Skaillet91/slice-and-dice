@@ -7,6 +7,7 @@
 	import assert from 'tiny-invariant';
 	import Button from './ui/button/button.svelte';
 	import { UndoIcon } from 'lucide-svelte';
+	import Slider from './ui/slider/slider.svelte';
 
 	// Services
 	const dicer = getContext<DicerService>('service:dicer');
@@ -43,7 +44,12 @@
 		<div class="flex gap-6">
 			<Input class="w-20" type="number" id="Brightness" min="0" bind:value={dicer.brightness} />
 
-			<Input type="range" min="0" max="200" bind:value={dicer.brightness} />
+			<Slider
+				min={0}
+				max={200}
+				value={[dicer.brightness]}
+				onValueChange={([newValue]) => (dicer.brightness = newValue)}
+			/>
 
 			<Button
 				variant="outline"
@@ -71,7 +77,7 @@
 		<div class="flex gap-6">
 			<Input class="w-20" type="number" id="Contrast" min="0" bind:value={dicer.contrast} />
 
-			<Input type="range" min="0" max="200" bind:value={dicer.contrast} />
+			<Slider min={0} max={200} value={[dicer.contrast]} onValueChange={([newValue]) => (dicer.contrast = newValue)} />
 
 			<Button
 				variant="outline"
@@ -99,7 +105,7 @@
 		<div class="flex gap-6">
 			<Input class="w-20" type="number" id="Gamma" min="0" bind:value={dicer.gamma} />
 
-			<Input type="range" min="0" max="200" bind:value={dicer.gamma} />
+			<Slider min={0} max={200} value={[dicer.gamma]} onValueChange={([newValue]) => (dicer.gamma = newValue)} />
 
 			<Button
 				variant="outline"
