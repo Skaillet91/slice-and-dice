@@ -20,7 +20,7 @@
 
 <header
 	class="
-   flex flex-wrap gap-x-4 gap-y-1 border-b bg-background p-4 items-baseline
+   flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b bg-background p-4
 
    md:flex-nowrap md:px-6
  "
@@ -29,10 +29,10 @@
 
 	<h1
 		class="
-   flex-1 shrink-0 grow whitespace-nowrap text-xl font-semibold tracking-tight
+    flex-1 shrink-0 grow whitespace-nowrap text-xl font-semibold tracking-tight
 
-   md:grow-0
- "
+    md:grow-0
+  "
 	>
 		Slice and Dice
 	</h1>
